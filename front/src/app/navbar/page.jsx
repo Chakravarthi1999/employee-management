@@ -10,12 +10,15 @@ import Link from 'next/link';
 
 const Navbar = () => {
 const router=useRouter()
-  const { user,logout } = useContext(AuthContext);
+  const { user,logout,loading } = useContext(AuthContext);
     // const [showNotifications, setShowNotifications] = useState(false);
     const [userrole,setUserrole]=useState("");
     
   useEffect(() => {
-    if (user) {
+   if (!loading) { 
+    if (!user) 
+      router.push("/");
+     else 
       setUserrole(user.role);
     }
   }, [user]);

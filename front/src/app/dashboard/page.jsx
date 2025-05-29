@@ -13,7 +13,6 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 function Dashboard() {
   const { user, logout, token,loading } = useContext(AuthContext);
-  // const [admins, setAdmins] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 const [banners, setBanners] = useState([]);
@@ -21,18 +20,19 @@ const [loader,setLoader]=useState(true)
 const [userrole,setUserrole]=useState("");
 const router=useRouter()
 
+ 
+
 useEffect(() => {
- if (!user) {
-     router.push("/");
-    return ;
-  }
-setUserrole(user.role)
-    // const isAdmin = user.role === "admin";
-  const loadUsers = async () => {
-    await fetchUsers( token, logout, setEmployees);
-    setLoader(false)
-  };
-// const fetchBanners = async () => {
+  if (!loading) { 
+    if (!user) {
+      router.push("/");
+    } else {
+      setUserrole(user.role); 
+      const loadUsers = async () => {
+        await fetchUsers(token, logout, setEmployees);
+        setLoader(false);
+      };
+      // const fetchBanners = async () => {
 //     try {
 // const res = await axios.get(banners);
 
@@ -43,12 +43,10 @@ setUserrole(user.role)
 //   };
 
 //   fetchBanners();
-  loadUsers();
-
-}, [user, token, logout]);
- 
-
-  // const isAdmin = user.role === "admin";
+      loadUsers();
+    }
+  }
+}, [user, token, loading, logout, router]);
 
   const handleDelete = async (id) => {
     const confirmDelete = confirm("Are you sure you want to delete?");
@@ -62,7 +60,6 @@ setUserrole(user.role)
 
         alert("Your account has been deleted. You will be logged out.");
         logout();
-        // localStorage.removeItem("user");
 router.push("/")
       } else {
         await axios.delete(`${API_BASE_URL}/${id}`, {
@@ -110,7 +107,7 @@ src={`${API_BASE_URL}/Banners/${banner.filename}`}
 )} */}
 
    {loader ? (
-    <div>Loading users...</div> 
+    <div></div> 
   ) : (
 <div className="dashboard-header">
 

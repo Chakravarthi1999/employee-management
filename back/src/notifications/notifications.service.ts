@@ -21,6 +21,29 @@ export class NotificationsService {
     if (!notif) throw new NotFoundException(`Notification with ID ${id} not found`);
     return notif;
   }
+async update(id: number, data: { title?: string; description?: string; image?: string }): Promise<Notification> {
+    return await this.prisma.notification.update({ where: { id }, data });
+  }
 
+  async remove(id: number): Promise<{ message: string }> {
+  const notification = await this.prisma.notification.findUnique({
+    where: { id },
+  });
+
+  if (!notification) {
+    throw new NotFoundException('Notification not found');
+  }
+
+  if (notification.image) {
+    const imagePath = path.join(process.cwd(), 'uploads', notification.image);
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath);
+    }
+  }
+
+  await this.prisma.notification.delete({ where: { id } });
+
+  return { message: 'Notification deleted successfully' };
+}
 
 }

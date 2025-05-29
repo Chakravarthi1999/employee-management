@@ -128,6 +128,7 @@ const handleSubmit = async (e) => {
         'Content-Type': 'multipart/form-data'
       }
     });
+    alert("registered successfully")
     router.push('/');
   } catch (error) {
     if (error.response && error.response.status === 409) {
@@ -139,10 +140,6 @@ const handleSubmit = async (e) => {
     }
   }
 };
-
-
-
-
 
 
   const today = new Date().toISOString().split("T")[0];

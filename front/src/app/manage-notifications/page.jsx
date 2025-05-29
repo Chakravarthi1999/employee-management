@@ -1,10 +1,12 @@
 "use client"
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 // import NotificationModal from './NotificationModal';
 import "./mn.css"
 import axios from 'axios';
 import getApiUrl from '@/constants/endpoints';
 import NotificationModal from '../NM/page';
+import AuthContext from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 
 const Managenotifications = () => {
@@ -14,20 +16,30 @@ const Managenotifications = () => {
   const [notifForm, setNotifForm] = useState({ title: '', description: '', image: null });
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
+  const {user,loading}=useContext(AuthContext)
+  const router=useRouter()
 
-useEffect(() => {
-    fetchNotifications();
-}, []);
 
- const fetchNotifications = async () => {
+   const fetchNotifications = async () => {
     try {
       const res = await axios.get(`${getApiUrl("notifications")}`);
-          console.log("Fetched notifications:", res.data); 
     setNotifications(res.data); 
     } catch (error) {
       console.error("Failed to fetch notifications:", error.message);
     }
   };
+
+useEffect(() => {
+  if (!user&&!loading) {
+    router.push("/");  
+  }
+    fetchNotifications();
+
+}, [user,loading]);
+
+if (!user) return null;
+
+
 
  const handleDeleteNotification = async (id) => {
   try {
@@ -96,6 +108,7 @@ const handleCreateNotification = async (eOrFormData) => {
 
 
   return (
+    
    <div className="notifications-container">
   <button
     onClick={() => {
@@ -161,7 +174,7 @@ const handleCreateNotification = async (eOrFormData) => {
     />
   )}
 </div>
-
+   
   );
 };
 

@@ -1,4 +1,4 @@
-// File: C:\Test(EMS) - Copy - Copy (2) - Copy\frontend\front\src\app\page.js
+// File: C:\employee-management-main\front\src\app\page.js
 import * as entry from '../../../src/app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

@@ -1,5 +1,5 @@
 "use client"
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import "./profile.css";
 import AuthContext from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -7,13 +7,22 @@ import getApiUrl from '@/constants/endpoints';
 
 
 const Profile = () => {
-  const { user } = useContext(AuthContext);
+  const { user,loading } = useContext(AuthContext);
 const router=useRouter();
    const handleEdit = (employee) => {
   localStorage.setItem('selectedEmployee', JSON.stringify(employee));
   router.push('/edit-profile');
 };
+useEffect(() => {
+  if (!user&&!loading) {
+    router.push("/");  
+  }
 
+}, [user,loading]);
+
+if (!user) {
+  return null; 
+}
   return (
     <div className="profile-container">
       <div className="profile-header">

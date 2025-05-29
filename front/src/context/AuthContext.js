@@ -1,4 +1,3 @@
-// context/AuthContext.jsx
 "use client";
 
 import axios from "axios";
@@ -9,25 +8,40 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-  // const [loading, setLoading] = useState(false);
-  // useEffect(() => {
-  //   const storedUser = localStorage.getItem("user");
-  //   const storedToken = localStorage.getItem("token");
+  const [loading, setLoading] = useState(true); 
 
-  //   if (storedUser) setUser(JSON.parse(storedUser));
-  //   if (storedToken) setToken(storedToken);
+  useEffect(() => {
+    const initializeAuth = async () => {
+      const id = localStorage.getItem("userId");
+      const storedToken = localStorage.getItem("token");
 
-  //   setLoading(false);
-  // }, []);
+      if (id && storedToken) {
+        try {
+          const res = await axios.get(`${getApiUrl("getbyid")}/${id}`, {
+            headers: { Authorization: `Bearer ${storedToken}` }
+          });
+          if (res.data && res.data.length > 0) {
+            setUser(res.data[0]);
+            setToken(storedToken);
+          }
+         
+        } catch (error) {
+          console.log("Auth initialization error:", error);
+          localStorage.removeItem("userId");
+          localStorage.removeItem("token");
+        }
+      }
+      setLoading(false);
+    };
 
-  const login = async (userData, token) => {
-   
-     setUser(userData);
+    initializeAuth();
+  }, []);
+
+  const login = (userData, token) => {
+    setUser(userData);
     setToken(token);
-    // setLoading(false);
-
-    // localStorage.setItem("user", JSON.stringify(userData));
-    // localStorage.setItem("token", token);
+    localStorage.setItem("userId", userData.id);
+    localStorage.setItem("token", token);
   };
 
   const logout = () => {
@@ -35,13 +49,13 @@ export const AuthProvider = ({ children }) => {
     if (!confirmDelete) return;
     setUser(null);
     setToken(null);
-    // localStorage.removeItem("user");
-    // localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("token");
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, setUser, login, logout }}>
-      {  children}
+    <AuthContext.Provider value={{ user, token, setUser, login, logout, loading }}>
+      {children}
     </AuthContext.Provider>
   );
 };

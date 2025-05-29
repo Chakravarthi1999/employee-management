@@ -1,9 +1,10 @@
 "use client"
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext, useEffect } from 'react';
 import axios from 'axios';
 import "./add.css";
 import getApiUrl from '@/constants/endpoints';
 import { useRouter } from 'next/navigation';
+import AuthContext from '@/context/AuthContext';
 
 const AddEmployee = () => {
   const [formData, setFormData] = useState({
@@ -20,7 +21,7 @@ const AddEmployee = () => {
   const [errors, setErrors] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
   const router = useRouter();
-
+const {user,loading}=useContext(AuthContext)
  const nameRef = useRef(null);
   const emailRef = useRef(null);
   const phoneRef = useRef(null);
@@ -31,6 +32,14 @@ const AddEmployee = () => {
 
   const today = new Date().toISOString().split("T")[0];
 
+useEffect(() => {
+  if (!user&&!loading) {
+    router.push("/");
+  }
+    
+
+}, [user,loading]);
+if (!user) return null;
 const handleChange = (e) => {
   const { name, value, files } = e.target;
 

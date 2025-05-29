@@ -35,6 +35,30 @@ export class NotificationsController {
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return this.service.findOne(id);
   }
+@Put(':id')
+  @UseInterceptors(FileInterceptor('image', {
+    storage: diskStorage({
+      destination: './uploads',
+      filename: (req, file, callback) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        callback(null, `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`);
+      }
+    })
+  }))
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { title?: string; description?: string },
+    @UploadedFile() file?: Express.Multer.File
+  ) {
+    const updateData = { ...body, image: file?.filename };
+    return this.service.update(id, updateData);
+  }
+
+  @Delete(':id')
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    await this.service.remove(id);
+    return { message: 'Notification deleted successfully' };
+  }
 
   
 }

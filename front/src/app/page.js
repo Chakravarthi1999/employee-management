@@ -13,53 +13,22 @@ const LoginForm = () => {
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
-  const { user,login } = useContext(AuthContext);
+  const { user,login,loading } = useContext(AuthContext);
   const router = useRouter();
-//  const [localId, setLocalId] = useState('');
-//   const [localToken, setLocalToken] = useState('');
+
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
-const [pageload,setPageload]=useState(false)
 
-//  useEffect(() => {
-//     // This runs only on the client
-//     const id = localStorage.getItem("userId") || "";
-//     const token = localStorage.getItem("token") || "";
 
-//     setLocalId(id);
-//     setLocalToken(token);
-//   }, []);
 
-  useEffect(() => {
-     const id = localStorage.getItem("userId") || "";
-    const token = localStorage.getItem("token") || "";
 
-    const refresh = async () => {
-      if (id && token) {
-        try {
-          const res = await axios.get(`${getApiUrl("getbyid")}/${id}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          console.log(res.data[0])
-          if (res.data && res.data.length > 0) {
-            login(res.data[0], token);
-                 router.push('/dashboard');
-setPageload(false)
-          }
-        } catch (error) {
-          console.log("Token refresh error:", error);
-        }
-      }
-      else{
-        router.push("/")
-        setPageload(true)
-      }
-    };
-    refresh();
-        setPageload(true)
-
-  }, []);
-
+useEffect(() => {
+  if (!loading) {
+    if (user) {
+      router.push('/dashboard');
+    }
+  }
+}, [user, loading]);
 
   const validate = () => {
     const newErrors = {};
@@ -103,15 +72,14 @@ setPageload(false)
       const res = await axios.post(`${getApiUrl("login")}`, { email, password });
       if (res.data.user && res.data.token) {
         login(res.data.user, res.data.token);
-        localStorage.setItem("userId",res.data.user.id)
-        localStorage.setItem("token", res.data.token)
+       
      router.push('/dashboard');
       } else {
         setServerError(res.data.message || res.data.Error || "Login failed");
       }
     }catch (error) {
   console.error('Login error:', error);
-    setServerError("Server error. Please try again.");
+    setServerError("Invalid credentials");
   }
 }
 
@@ -125,13 +93,9 @@ setPageload(false)
     if (name === 'email') setEmail(value);
     if (name === 'password') setPassword(value);
   };
-//  if (user) {
-//       router.push('/dashboard');
-//       return;
-//     }
+
   return (
-    <>
-   {pageload ? (
+  
 
     <form className="login-container" onSubmit={handleSubmit}>
       <h2>Login</h2>
@@ -166,10 +130,10 @@ setPageload(false)
         Do not have an account? <Link href="/register">Register here</Link>
       </p>
     </form>
-   ):(<div></div>
+   
 
-   )}
-    </>
+ 
+  
   );
 };
 
