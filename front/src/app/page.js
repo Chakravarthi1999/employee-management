@@ -74,12 +74,11 @@ useEffect(() => {
         login(res.data.user, res.data.token);
        
      router.push('/dashboard');
-      } else {
-        setServerError(res.data.message || res.data.Error || "Login failed");
-      }
+      } 
     }catch (error) {
+              setServerError(error.response.data.message );
+
   console.error('Login error:', error);
-    setServerError("Invalid credentials");
   }
 }
 

@@ -2,16 +2,16 @@
 import React, { useContext,useEffect,useState } from 'react';
 import './navbar.css'; 
  import { FiBell } from "react-icons/fi"; 
-// import Notifications from './Notifications';
 import { useRouter } from 'next/navigation';
 import AuthContext from '@/context/AuthContext';
 import Link from 'next/link';
   import getApiUrl from '@/constants/endpoints';
+import Notifications from '../notifications/page';
 
 const Navbar = () => {
 const router=useRouter()
   const { user,logout,loading } = useContext(AuthContext);
-    // const [showNotifications, setShowNotifications] = useState(false);
+     const [showNotifications, setShowNotifications] = useState(false);
     const [userrole,setUserrole]=useState("");
     
   useEffect(() => {
@@ -56,7 +56,7 @@ return (
         <FiBell size={24} />
       </button>
 
-      {/* {showNotifications && <Notifications onClose={() => setShowNotifications(false)} />} */}
+       {showNotifications && <Notifications onClose={() => setShowNotifications(false)} />} 
     </>
        )} 
         <button onClick={logout} className="logout-btn">Logout</button>

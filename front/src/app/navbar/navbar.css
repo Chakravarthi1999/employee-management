@@ -37,7 +37,7 @@
 .logout-btn {
   background-color: transparent;
   color: #ffffff;
-  /* border: 1px solid transparent; */
+  border: 1px solid transparent;
   padding: 8px 14px;
   font-size: 14px;
   font-weight: 500;

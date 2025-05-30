@@ -7,7 +7,9 @@ const apiEndpoints = {
   users: '/users',
   uploads:'/uploads',
   getbyid:'/getbyid',
-  notifications:'/notifications'
+  notifications:'/notifications',
+    birthdays:'/birthdays'
+
 };
 
 const getApiUrl = (endpoint) => {

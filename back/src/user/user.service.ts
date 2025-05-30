@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/require-await */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import { Injectable, BadRequestException,NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException,NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -25,7 +25,7 @@ export class UserService {
     });
 
     if (existingUser) {
-      throw new BadRequestException('Email already exists');
+      throw new ConflictException('Email already exists');
     }
 
     const imagePath = image.filename;
@@ -82,6 +82,21 @@ export class UserService {
         image: true,
       },
     });
+  }
+
+  async findTodayBirthdays() {
+    const today = new Date();
+    const todayStr = today.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+
+    const birthdays = await this.prisma.$queryRaw<
+      Array<{ id: number; name: string }>
+    >`
+      SELECT id, name
+      FROM "User"
+      WHERE TO_CHAR(dob, 'MM-DD') = TO_CHAR(${todayStr}::date, 'MM-DD')
+    `;
+
+    return birthdays;
   }
 
  async updateProfile(id: number, data: any, image: Express.Multer.File) {

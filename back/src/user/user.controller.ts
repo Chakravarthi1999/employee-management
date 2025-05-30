@@ -61,6 +61,12 @@ export class UserController {
     return this.userService.getAllUsers();
   }
 
+
+  @Get("/birthdays")
+  async getTodayBirthdays() {
+    return this.userService.findTodayBirthdays();
+  }
+
 @UseGuards(JwtAuthGuard)
   @Put('/:id')
   @UseInterceptors(
@@ -75,6 +81,8 @@ export class UserController {
       }),
     }),
   )
+
+
   async updateProfile(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: any,
