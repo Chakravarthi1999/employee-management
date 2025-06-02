@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable prettier/prettier */
 import {
   Controller,
   Post,
@@ -8,21 +5,16 @@ import {
   Body,
   UploadedFile,
   UseInterceptors,
-  UseGuards,
   Param,
   Delete,
-    HttpException,
-  HttpStatus,
   ParseIntPipe,
-  Put
+  Put,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { UserService } from './user.service';
 import { extname } from 'path';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-// import { Role } from '../auth/roles.decorator';
-// import { RolesGuard } from '../auth/jwt-auth.guard';
+
 
 @Controller()
 export class UserController {
@@ -54,20 +46,17 @@ export class UserController {
     return this.userService.login(body);
   }
 
-  @UseGuards(JwtAuthGuard)
-  // @Role('admin')
   @Get('users')
   async findAll() {
     return this.userService.getAllUsers();
   }
 
 
-  @Get("/birthdays")
+  @Get('/birthdays')
   async getTodayBirthdays() {
     return this.userService.findTodayBirthdays();
   }
 
-@UseGuards(JwtAuthGuard)
   @Put('/:id')
   @UseInterceptors(
     FileInterceptor('image', {
@@ -82,7 +71,6 @@ export class UserController {
     }),
   )
 
-
   async updateProfile(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: any,
@@ -91,21 +79,13 @@ export class UserController {
     return this.userService.updateProfile(id, body, image);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('getbyid/:id')
   async getUserById(@Param('id', ParseIntPipe) id: number) {
     return this.userService.getUserById(id);
   }
 
-   @UseGuards(JwtAuthGuard)
   @Delete('/:id')
   async deleteUser(@Param('id', ParseIntPipe) id: number) {
-    const deleted = await this.userService.deleteUserById(id);
-    if (!deleted) {
-      throw new HttpException('User not found or already deleted', HttpStatus.NOT_FOUND);
-    }
-    return { message: 'User deleted successfully' };
+    return this.userService.deleteUserById(id);
   }
-
- 
 }

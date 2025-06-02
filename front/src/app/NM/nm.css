@@ -57,7 +57,6 @@
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 15px;
-  /* box-sizing: border-box; */
 }
 
 .form-group textarea {

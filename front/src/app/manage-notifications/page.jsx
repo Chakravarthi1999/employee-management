@@ -1,6 +1,5 @@
 "use client"
 import React, { useState, useEffect, useContext } from 'react';
-// import NotificationModal from './NotificationModal';
 import "./mn.css"
 import axios from 'axios';
 import getApiUrl from '@/constants/endpoints';

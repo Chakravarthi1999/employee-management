@@ -8,19 +8,26 @@ import AuthContext from "@/context/AuthContext";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const EditProfile = () => {
-  const { user, setUser, token } = useContext(AuthContext);
+  const { user, setUser, token,loading } = useContext(AuthContext);
   const [editData, setEditData] = useState(null);
   const [image, setImage] = useState(null);
   const [errors, setErrors] = useState({});
   const router = useRouter();
 
   useEffect(() => {
+    if (!user&&!loading) {
+    router.push("/");  
+  }
     const data = localStorage.getItem("selectedEmployee");
     if (data) {
       setEditData(JSON.parse(data));
     }
-  }, []);
+  }, [user,loading]);
 
+
+if (!user) {
+  return null; 
+}
   if (!editData) return <div>Loading...</div>;
 
   const validateField = (field, value) => {

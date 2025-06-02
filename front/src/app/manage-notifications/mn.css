@@ -2,9 +2,7 @@
   width: 100%;
   margin: 50px auto;
   padding: 30px;
-  /* background: #ffffff; */
   border-radius: 12px;
-  /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); */
 }
 
 .create-btn {
@@ -51,7 +49,6 @@
 }
 
 .notifications-table td {
-  /* vertical-align: middle; */
   border-bottom: 1px solid #eee;
   padding-bottom: 0px !important;
   color: #444;

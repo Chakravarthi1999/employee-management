@@ -15,6 +15,7 @@ const LoginForm = () => {
   const [serverError, setServerError] = useState('');
   const { user,login,loading } = useContext(AuthContext);
   const router = useRouter();
+    const [isSubmitting, setIsSubmitting] = useState(false); 
 
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
@@ -67,15 +68,19 @@ useEffect(() => {
       focusMap[firstInvalid]?.current?.focus();
       return;
     }
+ setIsSubmitting(true); 
 
     try {
       const res = await axios.post(`${getApiUrl("login")}`, { email, password });
       if (res.data.user && res.data.token) {
         login(res.data.user, res.data.token);
-       
+        setIsSubmitting(false); 
+
      router.push('/dashboard');
       } 
     }catch (error) {
+       setIsSubmitting(false); 
+
               setServerError(error.response.data.message );
 
   console.error('Login error:', error);
@@ -123,8 +128,9 @@ useEffect(() => {
 
       {serverError && <span className="error server-error">{serverError}</span>}
 
-      <button type="submit">Login</button>
-
+<button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? <span className="loader"></span> : 'Login'}
+      </button>
       <p className="link-text">
         Do not have an account? <Link href="/register">Register here</Link>
       </p>

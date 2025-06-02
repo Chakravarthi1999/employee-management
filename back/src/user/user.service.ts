@@ -1,10 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable prettier/prettier */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/require-await */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Injectable, BadRequestException,NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -25,7 +18,7 @@ export class UserService {
     });
 
     if (existingUser) {
-      throw new ConflictException('Email already exists');
+      throw new BadRequestException('Email already exists');
     }
 
     const imagePath = image.filename;
@@ -40,7 +33,7 @@ export class UserService {
       },
     });
 
-    return { message: 'User registered successfully', user };
+    return { message: 'User registered successfully' };
   }
 
   async login(data: { email: string; password: string }) {
@@ -84,20 +77,29 @@ export class UserService {
     });
   }
 
-  async findTodayBirthdays() {
-    const today = new Date();
-    const todayStr = today.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+async findTodayBirthdays() {
+ const users = await this.prisma.user.findMany({
+  select: {
+    id: true,
+    name: true,
+    dob: true,
+  },
+});
 
-    const birthdays = await this.prisma.$queryRaw<
-      Array<{ id: number; name: string }>
-    >`
-      SELECT id, name
-      FROM "User"
-      WHERE TO_CHAR(dob, 'MM-DD') = TO_CHAR(${todayStr}::date, 'MM-DD')
-    `;
+const today = new Date();
+const todayMonth = today.getMonth() + 1;
+const todayDay = today.getDate();
 
-    return birthdays;
-  }
+const birthdays = users.filter(user => {
+  if (!user.dob) return false; 
+  const dob = new Date(user.dob);
+  return dob.getMonth() + 1 === todayMonth && dob.getDate() === todayDay;
+});
+
+return birthdays;
+
+}
+
 
  async updateProfile(id: number, data: any, image: Express.Multer.File) {
     const user = await this.prisma.user.findUnique({
@@ -130,7 +132,7 @@ export class UserService {
       },
     });
 
-    return { message: 'Profile updated successfully', user: updatedUser };
+    return { message: 'Profile updated successfully' };
   }
 
   async getUserById(id: number) {

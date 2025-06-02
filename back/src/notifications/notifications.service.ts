@@ -8,24 +8,21 @@ import * as path from 'path';
 export class NotificationsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: { title: string; description: string; image?: string }): Promise<Notification> {
+  async create(data: { title: string; description: string; image: string }) {
     return await this.prisma.notification.create({ data });
   }
 
-  async findAll(): Promise<Notification[]> {
+  async findAll() {
     return await this.prisma.notification.findMany({ orderBy: { createdAt: 'desc' } });
   }
 
-  async findOne(id: number): Promise<Notification> {
-    const notif = await this.prisma.notification.findUnique({ where: { id } });
-    if (!notif) throw new NotFoundException(`Notification with ID ${id} not found`);
-    return notif;
-  }
-async update(id: number, data: { title?: string; description?: string; image?: string }): Promise<Notification> {
+
+
+async update(id: number, data: { title?: string; description?: string; image?: string }) {
     return await this.prisma.notification.update({ where: { id }, data });
   }
 
-  async remove(id: number): Promise<{ message: string }> {
+  async remove(id: number) {
   const notification = await this.prisma.notification.findUnique({
     where: { id },
   });

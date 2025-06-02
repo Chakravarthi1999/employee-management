@@ -20,6 +20,8 @@ const RegisterForm = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState({});
   const router = useRouter();
+    const [isSubmitting, setIsSubmitting] = useState(false); 
+
 
   const nameRef = useRef(null);
   const emailRef = useRef(null);
@@ -116,7 +118,7 @@ const handleSubmit = async (e) => {
     
     return;
   }
-
+ setIsSubmitting(true); 
   const data = new FormData();
   for (let key in formData) {
     data.append(key, formData[key]);
@@ -128,17 +130,22 @@ const handleSubmit = async (e) => {
         'Content-Type': 'multipart/form-data'
       }
     });
+
     alert("registered successfully")
+     setIsSubmitting(false); 
+
     router.push('/');
   } catch (error) {
-    if (error.response && error.response.status === 409) {
-      setErrors((prev) => ({ ...prev, email: error.response.data.error }));
+     setIsSubmitting(false); 
+    if (error.response) {
+      setErrors((prev) => ({ ...prev, email: error.response.data.message }));
       emailRef.current?.focus(); 
     } else {
       console.error("Registration failed:", error);
       alert("Something went wrong. Please try again.");
     }
   }
+ 
 };
 
 
@@ -197,8 +204,9 @@ const handleSubmit = async (e) => {
         </div>
       )}
 
-<button type="submit" >Register</button>
-
+   <button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? <span className="loader"></span> : 'Register'}
+      </button>
       <p className="link-text">
         Already have an account? <Link href="/">Login here</Link>
       </p>

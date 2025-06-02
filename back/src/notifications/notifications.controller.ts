@@ -21,9 +21,9 @@ export class NotificationsController {
   }))
   async create(
     @Body() body: { title: string; description: string },
-    @UploadedFile() file?: Express.Multer.File,
+    @UploadedFile() image: Express.Multer.File,
   ) {
-    return this.service.create({ ...body, image: file?.filename });
+    return this.service.create({ ...body, image:image.filename });
   }
 
   @Get()
@@ -31,10 +31,8 @@ export class NotificationsController {
     return this.service.findAll();
   }
 
-  @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.service.findOne(id);
-  }
+  
+
 @Put(':id')
   @UseInterceptors(FileInterceptor('image', {
     storage: diskStorage({
@@ -48,16 +46,15 @@ export class NotificationsController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { title?: string; description?: string },
-    @UploadedFile() file?: Express.Multer.File
+    @UploadedFile() image?: Express.Multer.File
   ) {
-    const updateData = { ...body, image: file?.filename };
+    const updateData = { ...body, image: image?.filename };
     return this.service.update(id, updateData);
   }
 
   @Delete(':id')
   async remove(@Param('id', ParseIntPipe) id: number) {
     await this.service.remove(id);
-    return { message: 'Notification deleted successfully' };
   }
 
   
