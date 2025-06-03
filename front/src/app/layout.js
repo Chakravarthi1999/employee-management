@@ -1,10 +1,10 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
-// import Navbar from "./navbar/page";
-// import Footer from "./footer/page";
 import Navbar from "@/components/ui/navbar";
 import Footer from "@/components/ui/footer";
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +31,15 @@ export default function RootLayout({ children }) {
          <div className="main-content"> 
 
         {children}
+         <ToastContainer 
+        position="bottom-right" 
+        autoClose={1000} 
+        hideProgressBar 
+        closeOnClick 
+        pauseOnHover={false} 
+        draggable={false} 
+        theme="colored"
+      />
         </div>
         <Footer/>
         </div>

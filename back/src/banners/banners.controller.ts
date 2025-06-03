@@ -57,13 +57,16 @@ export class BannersController {
     await Promise.all([
       this.bannersService.createMultiple(files.files || [], createDtos),
       this.bannersService.updateBanners(updateDtos),
-       this.bannersService.deleteBanners(deleteIds),
+      this.bannersService.deleteBanners(deleteIds),
     ]);
 
     return { message: 'Banners updated successfully' };
   }
 
- 
+  @Get('visible-banners')
+  getVisible() {
+    return this.bannersService.findVisible();
+  }
 
   @Get('all-banners')
   getAll() {

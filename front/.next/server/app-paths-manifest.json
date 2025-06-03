@@ -1,8 +1,7 @@
 {
   "/dashboard/page": "app/dashboard/page.js",
-  "/edit-profile/page": "app/edit-profile/page.js",
+  "/manage-notifications/page": "app/manage-notifications/page.js",
+  "/add-employee/page": "app/add-employee/page.js",
   "/page": "app/page.js",
-  "/CompanyBanners/page": "app/CompanyBanners/page.js",
-  "/register/page": "app/register/page.js",
   "/profile/page": "app/profile/page.js"
 }

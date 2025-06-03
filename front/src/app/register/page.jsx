@@ -1,10 +1,11 @@
 "use client"
 import React, { useState, useRef } from 'react';
-import './register.css';
 import axios from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-  import getApiUrl from '@/constants/endpoints';
+import getApiUrl from '@/constants/endpoints';
+import { toast } from 'react-toastify';
+
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -20,7 +21,7 @@ const RegisterForm = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState({});
   const router = useRouter();
-    const [isSubmitting, setIsSubmitting] = useState(false); 
+  const [isSubmitting, setIsSubmitting] = useState(false); 
 
 
   const nameRef = useRef(null);
@@ -131,8 +132,8 @@ const handleSubmit = async (e) => {
       }
     });
 
-    alert("registered successfully")
      setIsSubmitting(false); 
+toast.success("Registered successfully!");
 
     router.push('/');
   } catch (error) {

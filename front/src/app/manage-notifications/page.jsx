@@ -1,11 +1,12 @@
 "use client"
 import React, { useState, useEffect, useContext } from 'react';
-import "./mn.css"
 import axios from 'axios';
 import getApiUrl from '@/constants/endpoints';
-import NotificationModal from '../NM/page';
 import AuthContext from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import NotificationModal from '@/components/ui/mnm';
+import { toast } from 'react-toastify';
+import ConfirmModal from '@/components/ui/confirmModal';
 
 
 const Managenotifications = () => {
@@ -16,6 +17,9 @@ const Managenotifications = () => {
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
   const {user,loading}=useContext(AuthContext)
+  const [showConfirm, setShowConfirm] = useState(false);
+const [notifToDelete, setNotifToDelete] = useState(null);
+
   const router=useRouter()
 
 
@@ -40,15 +44,26 @@ if (!user) return null;
 
 
 
- const handleDeleteNotification = async (id) => {
+const confirmDelete = (notif) => {
+  setNotifToDelete(notif);
+  setShowConfirm(true);
+};
+
+const handleDeleteConfirmed = async () => {
   try {
-    await axios.delete(`${getApiUrl("notifications")}/${id}`);
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    await axios.delete(`${getApiUrl("notifications")}/${notifToDelete.id}`);
+    setNotifications((prev) => prev.filter((n) => n.id !== notifToDelete.id));
+    toast.success("Notification deleted successfully!");
+    router.push("/manage-notifications")
   } catch (error) {
     console.error("Failed to delete notification:", error);
-    alert("Error deleting notification.");
+    toast.error("Error deleting notification.");
+  } finally {
+    setShowConfirm(false);
+    setNotifToDelete(null);
   }
 };
+
 
 
  
@@ -87,10 +102,14 @@ const handleCreateNotification = async (eOrFormData) => {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
+      toast.success("notification updated successfully!");
+      
     } else {
       await axios.post(`${getApiUrl("notifications")}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+            toast.success("notification created successfully!");
+
     }
 
     await fetchNotifications();
@@ -100,7 +119,7 @@ const handleCreateNotification = async (eOrFormData) => {
     setShowModal(false);
   } catch (err) {
     console.error("Notification submit error:", err);
-    alert("Failed to submit notification.");
+    toast.error("Failed to submit notification.");
   }
 };
 
@@ -120,7 +139,7 @@ const handleCreateNotification = async (eOrFormData) => {
     Create Notification
   </button>
 
-  <table className="notifications-table">
+  <table >
     <thead>
       <tr>
         <th>Title</th>
@@ -143,9 +162,9 @@ const handleCreateNotification = async (eOrFormData) => {
               />
             </td>
             <td>
-              <div className="n-acations">
-                <button onClick={() => handleEdit(notif)} className="btn-edit">Edit</button>
-                <button onClick={() => handleDeleteNotification(notif.id)} className="btn-delete">Delete</button>
+              <div className="form-actions">
+                <button onClick={() => handleEdit(notif)}>Edit</button>
+<button onClick={() => confirmDelete(notif)} >Delete</button>
               </div>
             </td>
           </tr>
@@ -172,6 +191,18 @@ const handleCreateNotification = async (eOrFormData) => {
       onSubmit={handleCreateNotification}
     />
   )}
+
+  {showConfirm && (
+  <ConfirmModal
+    message={`Are you sure you want to delete "${notifToDelete.title}"?`}
+    onConfirm={handleDeleteConfirmed}
+    onCancel={() => {
+      setShowConfirm(false);
+      setNotifToDelete(null);
+    }}
+  />
+)}
+
 </div>
    
   );

@@ -1,6 +1,5 @@
 "use client"
 import React, { useContext, useEffect } from 'react';
-import "./profile.css";
 import AuthContext from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import getApiUrl from '@/constants/endpoints';
@@ -30,7 +29,6 @@ if (!user) {
           <img
   src={`${getApiUrl("uploads")}/${user.image}`}
             alt="Profile"
-            className="profile-img"
           />
         </div>
         <div className="profile-details">

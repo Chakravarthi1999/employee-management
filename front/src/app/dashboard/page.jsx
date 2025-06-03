@@ -1,13 +1,15 @@
 "use client"
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import "./dashboard.css";
-// import { Carousel } from "react-responsive-carousel";
-// import "react-responsive-carousel/lib/styles/carousel.min.css";
+import { Carousel } from "react-responsive-carousel";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 import AuthContext from "@/context/AuthContext";
 import fetchUsers from "../fetchUsers";
 import { useRouter } from "next/navigation";
 import getApiUrl from "@/constants/endpoints";
+import { toast } from 'react-toastify';
+import ConfirmModal from "@/components/ui/confirmModal";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 
@@ -18,6 +20,9 @@ function Dashboard() {
 const [banners, setBanners] = useState([]);
 const [loader,setLoader]=useState(true)
 const [userrole,setUserrole]=useState("");
+const [showDeleteModal, setShowDeleteModal] = useState(false);
+const [deleteTarget, setDeleteTarget] = useState(null);
+
 const router=useRouter()
 
  
@@ -32,46 +37,55 @@ useEffect(() => {
         await fetchUsers(token, logout, setEmployees);
         setLoader(false);
       };
-      // const fetchBanners = async () => {
-//     try {
-// const res = await axios.get(banners);
+      const fetchBanners = async () => {
+    try {
+const res = await axios.get(`${getApiUrl("visiblebanners")}`);
 
-//       setBanners(res.data);
-//     } catch (err) {
-//       console.error("Failed to load banners", err);
-//     }
-//   };
+      setBanners(res.data);
+    } catch (err) {
+      console.error("Failed to load banners", err);
+    }
+  };
 
-//   fetchBanners();
+  fetchBanners();
       loadUsers();
     }
   }
 }, [user, token, loading, logout, router]);
 
-  const handleDelete = async (id) => {
-    const confirmDelete = confirm("Are you sure you want to delete?");
-    if (!confirmDelete) return;
+const confirmDelete = (id) => {
+  setDeleteTarget(id);
+  setShowDeleteModal(true);
+};
 
-    try {
-      if (id === user.id) {
-       await axios.delete(`${API_BASE_URL}/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+const handleDeleteConfirmed = async () => {
+  if (!deleteTarget) return;
+  try {
+    if (deleteTarget === user.id) {
+      await axios.delete(`${API_BASE_URL}/${deleteTarget}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      logout();
+      toast.success("Deleted successfully!");
+      
+      router.push("/");
+    } else {
+      await axios.delete(`${API_BASE_URL}/${deleteTarget}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+            toast.success("Deleted successfully!");
 
-        alert("Your account has been deleted. You will be logged out.");
-        logout();
-router.push("/")
-      } else {
-        await axios.delete(`${API_BASE_URL}/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        fetchUsers( token, logout,  setEmployees);
-      }
-    } catch (err) {
-      console.error("Delete error:", err);
-      alert("Failed to delete user.");
+      fetchUsers(token, logout, setEmployees);
     }
-  };
+  } catch (err) {
+    console.error("Delete error:", err);
+    toast.error("Failed to delete user.");
+  } finally {
+    setShowDeleteModal(false);
+    setDeleteTarget(null);
+  }
+};
+
 
   const handleEdit = (employee) => {
   localStorage.setItem('selectedEmployee', JSON.stringify(employee));
@@ -81,7 +95,7 @@ router.push("/")
   return (
     <>
  
-{/* {!isAdmin && banners.length > 0 && (
+ {!(userrole === "admin") && banners.length > 0 && (
   <div className="carousel-wrapper">
     <Carousel
       autoPlay
@@ -96,7 +110,7 @@ router.push("/")
       {banners.map((banner, index) => (
         <div key={index} className="banner-slide">
           <img
-src={`${API_BASE_URL}/Banners/${banner.filename}`} 
+src={`${API_BASE_URL}/uploads/${banner.filename}`} 
             alt={`banner-${index}`}
             className="banner-image"
           />
@@ -104,10 +118,12 @@ src={`${API_BASE_URL}/Banners/${banner.filename}`}
       ))}
     </Carousel>
   </div>
-)} */}
+)} 
 
    {loader ? (
-    <div></div> 
+<div className="loading-wrapper">
+  <div className="spinner"></div>
+</div>
   ) : (
 <div className="dashboard-header">
 
@@ -146,14 +162,16 @@ src={`${API_BASE_URL}/Banners/${banner.filename}`}
               <td>{u.email}</td>
               <td>{u.phone}</td>
               <td>{new Date(u.dob).toLocaleDateString("en-GB")}</td>
-              <td>{u.role || u.type}</td>
+              <td>{u.role || u.type||'N/A'}</td>
               <td>
 <img src={`${getApiUrl("uploads")}/${u.image}`} alt="test" />
               </td>
               {userrole === "admin" && (
-                <td className="actions">
+                <td>
+                <div className="form-actions">
                   <button onClick={() => handleEdit(u)}>Edit</button>
-                  <button onClick={() => handleDelete(u.id)}>Delete</button>
+<button onClick={() => confirmDelete(u.id)}>Delete</button>
+                </div>
                 </td>
               )}
             </tr>
@@ -163,6 +181,26 @@ src={`${API_BASE_URL}/Banners/${banner.filename}`}
   
 </div>
   )} 
+
+ {showDeleteModal && (
+  <ConfirmModal
+   message=
+  
+    {deleteTarget === user?.id
+      ? "Are you sure you want to delete your own account? You will be logged out."
+      : "Are you sure you want to delete this user?"}
+
+
+
+    onConfirm={handleDeleteConfirmed}
+    onCancel={() => {
+       setShowDeleteModal(false);
+            setDeleteTarget(null);
+    }}
+  />
+)}
+
+
     </>
   );
 }

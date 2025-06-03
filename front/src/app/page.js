@@ -6,7 +6,8 @@ import axios from 'axios';
 import Link from 'next/link';
 import AuthContext from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-  import getApiUrl from '@/constants/endpoints';
+import getApiUrl from '@/constants/endpoints';
+import { toast } from 'react-toastify';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -75,16 +76,18 @@ useEffect(() => {
       if (res.data.user && res.data.token) {
         login(res.data.user, res.data.token);
         setIsSubmitting(false); 
+toast.success("Login successful!");
 
      router.push('/dashboard');
       } 
     }catch (error) {
-       setIsSubmitting(false); 
-
-              setServerError(error.response.data.message );
-
+  setIsSubmitting(false); 
   console.error('Login error:', error);
-  }
+
+  const message = error.response?.data?.message || "Something went wrong. Please try again.";
+  setServerError(message);
+}
+
 }
 
   

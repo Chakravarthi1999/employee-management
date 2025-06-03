@@ -1,10 +1,10 @@
 "use client";
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import "./edit.css";
 import { useRouter } from "next/navigation";
 import getApiUrl from "@/constants/endpoints";
 import AuthContext from "@/context/AuthContext";
+import { toast } from 'react-toastify';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const EditProfile = () => {
@@ -87,12 +87,13 @@ if (!user) {
   },
         });
         setUser(res.data[0]);
+              router.push("/profile");
       }
 
       setEditData(null);
-      alert("Profile updated successfully.");
+toast.success("profile updated successfully!");
       localStorage.removeItem("selectedEmployee")
-      router.push("/profile");
+      router.push("/dashboard");
     } catch (error) {
       console.error("Error updating profile:", error);
     }
@@ -106,7 +107,6 @@ if (!user) {
     <div className="edit-profile-container">
       <h2>Edit Profile</h2>
 
-      <div className="form-group">
         <label>Name:</label>
         <input
           type="text"
@@ -115,9 +115,8 @@ if (!user) {
           placeholder="Enter your name"
         />
         {errors.name && <span className="error">{errors.name}</span>}
-      </div>
 
-      <div className="form-group">
+      
         <label>Phone:</label>
         <input
           type="text"
@@ -126,9 +125,8 @@ if (!user) {
           placeholder="Enter your phone number"
         />
         {errors.phone && <span className="error">{errors.phone}</span>}
-      </div>
+     
 
-      <div className="form-group">
         <label>Email:</label>
         <input
           type="email"
@@ -137,10 +135,9 @@ if (!user) {
           placeholder="Enter your email"
         />
         {errors.email && <span className="error">{errors.email}</span>}
-      </div>
 
       {editData.role !== "admin" && (
-        <div className="form-group">
+         <>
           <label>Type:</label>
           <select
             value={editData.type}
@@ -151,10 +148,9 @@ if (!user) {
             <option value="Tester">Tester</option>
           </select>
           {errors.type && <span className="error">{errors.type}</span>}
-        </div>
+        </>
       )}
 
-      <div className="form-group">
         <label>Profile Image</label>
         <input type="file" onChange={handleImagePreview} />
 
@@ -163,8 +159,8 @@ if (!user) {
             <label>Current Image:</label>
             <img
               src={`${getApiUrl("uploads")}/${editData.image}`}
+        
               alt="Current Profile"
-              className="preview-img"
             />
           </div>
         )}
@@ -175,13 +171,12 @@ if (!user) {
             <img
               src={URL.createObjectURL(image)}
               alt="Selected Profile"
-              className="preview-img"
             />
           </div>
         )}
-      </div>
+      
 
-      <button onClick={handleUpdate}>Update</button>
+      <button onClick={handleUpdate} type="submit">Update</button>
     </div>
   );
 };

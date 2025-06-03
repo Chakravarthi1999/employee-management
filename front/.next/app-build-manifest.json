@@ -6,12 +6,6 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/register/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/register/page.css",
-      "static/chunks/app/register/page.js"
-    ],
     "/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -27,20 +21,27 @@
     "/profile/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/profile/page.css",
       "static/chunks/app/profile/page.js"
     ],
     "/edit-profile/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/edit-profile/page.css",
       "static/chunks/app/edit-profile/page.js"
     ],
     "/CompanyBanners/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/CompanyBanners/page.css",
       "static/chunks/app/CompanyBanners/page.js"
+    ],
+    "/manage-notifications/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/manage-notifications/page.js"
+    ],
+    "/add-employee/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/add-employee/page.js"
     ]
   }
 }

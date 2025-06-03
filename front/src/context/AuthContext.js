@@ -3,12 +3,17 @@
 import axios from "axios";
 import React, { createContext, useState, useEffect } from "react";
 import getApiUrl from "@/constants/endpoints";
+import ConfirmModal from "@/components/ui/confirmModal";
+
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true); 
+const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [pendingLogout, setPendingLogout] = useState(false);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -45,18 +50,36 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    const confirmDelete = confirm("Are you sure you want to logout?");
-    if (!confirmDelete) return;
+    setShowLogoutModal(true);
+    setPendingLogout(true);
+  };
+
+  const confirmLogout = () => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("userId");
     localStorage.removeItem("token");
+    setShowLogoutModal(false);
+    setPendingLogout(false);
   };
+
 
   return (
     <AuthContext.Provider value={{ user, token, setUser, login, logout, loading }}>
       {children}
-    </AuthContext.Provider>
+
+  {showLogoutModal && (
+  <ConfirmModal
+    message="Are you sure you want to logout?"
+    onConfirm={confirmLogout}
+    onCancel={() => {
+       setShowLogoutModal(false);
+    setPendingLogout(false);
+    }}
+  />
+)}
+
+        </AuthContext.Provider>
   );
 };
 

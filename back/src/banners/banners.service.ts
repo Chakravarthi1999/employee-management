@@ -51,7 +51,12 @@ export class BannersService {
     return Promise.all(deletions);
   }
 
-
+  findVisible() {
+    return this.prisma.banner.findMany({
+      where: { visibility:Visibility.visible },
+      orderBy: { order_index: 'asc' }
+    });
+  }
 
   findAll() {
     return this.prisma.banner.findMany({ orderBy: { order_index: 'asc' } }); 

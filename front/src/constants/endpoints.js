@@ -9,7 +9,8 @@ const apiEndpoints = {
   uploads:'/uploads',
   getbyid:'/getbyid',
   notifications:'/notifications',
-    birthdays:'/birthdays'
+    birthdays:'/birthdays',
+    visiblebanners:'/visible-banners'
 
 };
 

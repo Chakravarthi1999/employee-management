@@ -6,9 +6,9 @@ import axios from "axios";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useRouter } from "next/navigation"; 
-import "./cb.css"; 
 import getApiUrl from "@/constants/endpoints";
 import AuthContext from "@/context/AuthContext";
+import { toast } from 'react-toastify';
 
 const maxSize = 5 * 1024 * 1024;
 const ItemType = "BANNER";
@@ -156,7 +156,8 @@ export default function CompanyBanners() {
       await axios.post(`${getApiUrl("uploadbanners")}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      alert("Banners updated successfully!");
+      toast.success("Banners updated successfully!");
+
       router.push("/CompanyBanners"); 
     } catch (error) {
       console.error("Error uploading banners:", error);

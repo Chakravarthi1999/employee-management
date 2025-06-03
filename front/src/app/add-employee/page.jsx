@@ -1,10 +1,10 @@
 "use client"
 import React, { useState, useRef, useContext, useEffect } from 'react';
 import axios from 'axios';
-import "./add.css";
 import getApiUrl from '@/constants/endpoints';
 import { useRouter } from 'next/navigation';
 import AuthContext from '@/context/AuthContext';
+import { toast } from 'react-toastify';
 
 const AddEmployee = () => {
   const [formData, setFormData] = useState({
@@ -21,7 +21,8 @@ const AddEmployee = () => {
   const [errors, setErrors] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
   const router = useRouter();
-const {user,loading}=useContext(AuthContext)
+  const [isSubmitting, setIsSubmitting] = useState(false); 
+  const {user,loading}=useContext(AuthContext)
  const nameRef = useRef(null);
   const emailRef = useRef(null);
   const phoneRef = useRef(null);
@@ -121,6 +122,7 @@ const handleSubmit = async (e) => {
     
     return;
   }
+ setIsSubmitting(true); 
 
   const data = new FormData();
   for (let key in formData) {
@@ -133,11 +135,14 @@ const handleSubmit = async (e) => {
         'Content-Type': 'multipart/form-data'
       }
     });
-    alert("employee added successfully")
+     setIsSubmitting(false); 
+
+toast.success("employee added successfully!");
 router.push("/dashboard")
   } catch (error) {
-    if (error.response && error.response.status === 409) {
-      setErrors((prev) => ({ ...prev, email: error.response.data.error }));
+     setIsSubmitting(false); 
+    if (error.response) {
+      setErrors((prev) => ({ ...prev, email: error.response.data.message }));
       emailRef.current?.focus(); 
     } else {
       console.error("Registration failed:", error);
@@ -148,7 +153,7 @@ router.push("/dashboard")
 
   return (
     <>
-      <h1>Add Employee</h1>
+      <h2>Add Employee</h2>
       <form className="register-container" onSubmit={handleSubmit}>
         <label>Name:</label>
         <input
@@ -235,8 +240,10 @@ router.push("/dashboard")
           </div>
         )}
 
-        <button type="submit">Register</button>
-      </form>
+<button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? <span className="loader"></span> : 'Register'}
+      </button>
+            </form>
     </>
   );
 };

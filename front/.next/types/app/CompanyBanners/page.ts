@@ -1,4 +1,4 @@
-// File: D:\employee-management\front\src\app\CompanyBanners\page.jsx
+// File: D:\nestJS\employee-management\front\src\app\CompanyBanners\page.jsx
 import * as entry from '../../../../src/app/CompanyBanners/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
