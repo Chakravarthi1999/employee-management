@@ -1,8 +1,8 @@
-// File: D:\nestJS\employee-management\front\src\app\manage-notifications\page.jsx
-import * as entry from '../../../../src/app/manage-notifications/page.js'
+// File: C:\ems\front\front\app\manage-notifications\page.tsx
+import * as entry from '../../../../app/manage-notifications/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../src/app/manage-notifications/page.js')
+type TEntry = typeof import('../../../../app/manage-notifications/page.js')
 
 type SegmentParams<T extends Object = any> = T extends Record<string, any>
   ? { [K in keyof T]: T[K] extends string ? string | string[] | undefined : never }
