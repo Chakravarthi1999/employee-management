@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model User {
+  id       Int     @id @default(autoincrement())
+  name     String
+  email    String  @unique
+  phone    String
+  password String
+  role     String
+  type     String?
+  dob      DateTime
+  image    String
+  createdAt DateTime @default(now())
+
+    notificationReads NotificationRead[] 
+}
+
+model Notification {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  image       String?  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+    notificationReads NotificationRead[] 
+}
+model Banner {
+  id          Int       @id @default(autoincrement())
+  filename    String    
+  visibility  Visibility @default(visible)
+  uploaded_at DateTime  @default(now())
+  order_index Int @default(0)
+
+ 
+}
+
+enum Visibility {
+  visible
+  hidden
+}
+
+model NotificationRead {
+  id             Int           @id @default(autoincrement())
+  userId         Int
+  notificationId Int
+  readAt         DateTime      @default(now())
+
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  notification   Notification  @relation(fields: [notificationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([userId, notificationId]) 
+}
