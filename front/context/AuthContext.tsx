@@ -4,18 +4,20 @@ import axios from "axios";
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import getApiUrl from "@/constants/endpoints";
 import ConfirmModal from "@/components/ui/confirmModal";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
-  type User= {
-    id:number;
+type User = {
+  id: number;
   name: string;
   email: string;
   phone: string;
   password: string;
-  role:string;
+  role: string;
   type: string;
   dob: string;
-  image: string; 
-}
+  image: string;
+};
 
 interface AuthContextType {
   user: User | null;
@@ -38,8 +40,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [pendingLogout, setPendingLogout] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      response => response,
+      error => {
+        if (error.response?.status === 401) {
+          toast.error('Login session expired. Please login again.');
+          localStorage.removeItem('token');
+          localStorage.removeItem('userId');
+          router.push('/');
+        }
+        return Promise.reject(error);
+      }
+    );
+
     const initializeAuth = async () => {
       const id = localStorage.getItem("userId");
       const storedToken = localStorage.getItem("token");
@@ -65,7 +81,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
 
     initializeAuth();
-  }, []);
+
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
+  }, [router]);  
 
   const login = (userData: User, token: string) => {
     setUser(userData);

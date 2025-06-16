@@ -18,6 +18,7 @@ type Notification = {
   title: string;
   description: string;
   image: string | null;
+  
 };
 
 const Managenotifications = () => {
@@ -111,6 +112,8 @@ const handleCreateNotification = async (eOrFormData: React.FormEvent<HTMLFormEle
     if (notifForm.image && typeof notifForm.image !== 'string') {
       formData.append("image", notifForm.image);
     }
+        formData.append("senderId", user.id.toString()); 
+
   }
 
   try {
@@ -125,7 +128,7 @@ const handleCreateNotification = async (eOrFormData: React.FormEvent<HTMLFormEle
       toast.success("notification updated successfully!");
       
     } else {
-      await axios.post(`${getApiUrl("notifications")}`, formData, {
+      await axios.post(`${getApiUrl("notifications")}`, formData,{
         headers: { "Content-Type": "multipart/form-data" },
       });
             toast.success("notification created successfully!");

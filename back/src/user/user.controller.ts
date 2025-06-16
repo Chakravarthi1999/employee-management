@@ -42,7 +42,7 @@ export class UserController {
   }
 
   @Post('login')
-  async login(@Body() body: { email: string, password: string,idToken:string }) {
+  async login(@Body() body: {idToken:string }) {
     return this.userService.login(body);
   }
 

@@ -89,9 +89,9 @@ const newErrors: Partial<FormErrors> = {};
         const firebaseUser =await signInWithEmailAndPassword(authentic, email, password);
 const idToken = await firebaseUser.user.getIdToken();
     
-      const res = await axios.post(`${getApiUrl("login")}`, { email, password,idToken });
-      if (res.data.user ) {
-        login(res.data.user, idToken);
+      const res = await axios.post(`${getApiUrl("login")}`, idToken);
+      if (res.data.user&&res.data.token ) {
+        login(res.data.user, res.data.token);
         setIsSubmitting(false); 
 toast.success("Login successful!");
 

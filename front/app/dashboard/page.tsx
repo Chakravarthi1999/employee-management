@@ -48,7 +48,7 @@ function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading) {
+    // if (!loading) {
       if (!user) {
         router.push("/");
       } else {
@@ -72,7 +72,7 @@ function Dashboard() {
 
         fetchBanners();
         loadUsers();
-      }
+      
     }
   }, [user, token, loading, logout, router]);
 
