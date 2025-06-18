@@ -11,15 +11,17 @@ html, body {
 .app-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; 
+  height: 100vh; 
 }
 .main-content {
-  flex: 1; 
+   flex: 1;  
   padding: 1rem;
-  display: flex;
-  flex-direction: column;
+   display: flex;
+  flex-direction: column; 
   padding-top: 70px;
+
 }
+
 /* login css */
 
 .login-container {
@@ -199,8 +201,7 @@ button[type="submit"]:hover {
    box-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
 }
 
-.nav-btn,
-.logout-btn {
+.nav-btn{
   background-color: transparent;
   color: #ffffff;
   border: 1px solid transparent;
@@ -237,13 +238,68 @@ button[type="submit"]:hover {
 }
 
 
-.logout-btn {
+/* .logout-btn {
+  border: none;
+  padding: 10px 16px;
   background-color: #e74c3c;
 }
 
 .logout-btn:hover {
   background-color: #c0392b;
   box-shadow: 0 0 8px rgba(192, 57, 43, 0.5);
+} */
+ .sidebar-dropdown {
+  position: absolute;
+  top: 70px;
+  right: 0px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 180px;
+}
+
+.sidebar-link {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.sidebar-link:hover {
+  background-color: #d1c4c4;
+} 
+
+.sidebar-left {
+  position: fixed;
+  top:70px;
+  left: 0;
+height: 686px;
+  width: 250px;
+  background-color: #fff;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease-in-out;
+}
+
+.sidebar-heading {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+.active-link {
+  background-color: #d0e6ff; 
+  font-weight: bold;
 }
 
 /* dashboard css */
@@ -450,11 +506,15 @@ table img {
 /* edit-profile css */
 .edit-profile-container {
   width: 400px;
-  margin: 50px auto;
+margin-left: 470px;
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.bread{
+margin-left: 270px;
+margin-bottom: 60px;
 }
 
 /* notification css */

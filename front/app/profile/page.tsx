@@ -31,10 +31,7 @@ const router=useRouter();
   type?: string;
 };
 
-const handleEdit = (employee: User) => {
-  localStorage.setItem('selectedEmployee', JSON.stringify(employee));
-  router.push('/edit-profile');
-};
+
 
 useEffect(() => {
   if (!user&&!loading) {
@@ -69,7 +66,6 @@ if (!user) {
             
               <p><strong>Type:</strong> {user.type}</p>
           )}
-             <button onClick={() => handleEdit(user)} className='edit-link'>Edit</button>
             
         
         </div>

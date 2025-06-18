@@ -76,7 +76,7 @@ const Notifications = ({ onClose }: { onClose: () => void }) => {
   useEffect(() => {
    fetchBirthdays();
      fetchNotifications();
-    //  listenRealtimeNotifications();
+     listenRealtimeNotifications();
     const handleClickOutside = (event: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
         onClose();

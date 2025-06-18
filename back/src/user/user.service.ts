@@ -59,11 +59,32 @@ async login(data: { idToken: string }) {
     throw new BadRequestException('Invalid credentials');
   }
 const payload = { id: user.id, email: user.email, role: user.role };
-  const token = this.jwtService.sign(payload, { expiresIn: '1d' });
+
+  const token = this.jwtService.sign(payload);
 
   return {user,token };
 }
 
+async changePassword(
+  id: number,
+  data: { currentPassword: string; newPassword: string }
+) {
+  const user = await this.userRepository.findUserById(id);
+  if (!user) throw new NotFoundException('User not found');
+
+  const isMatch = await bcrypt.compare(data.currentPassword, user.password);
+  if (!isMatch) throw new BadRequestException('Incorrect current password');
+
+  const fbUser = await admin.auth().getUserByEmail(user.email);
+  await admin.auth().updateUser(fbUser.uid, {
+    password: data.newPassword,
+  });
+
+  const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+  await this.userRepository.updatePassword(id, hashedPassword);
+
+  return { message: 'Password changed successfully' };
+}
 
   async getAllUsers() {
     return this.userRepository.getAllUsers();

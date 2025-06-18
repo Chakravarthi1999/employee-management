@@ -145,7 +145,9 @@ for (const field of fields) {
 
   return (
     <>
+    <div className="bread">
     <Breadcrumb items={breadcrumbItems} />
+    </div>
     <div className="edit-profile-container">
       <h2>Edit Profile</h2>
 

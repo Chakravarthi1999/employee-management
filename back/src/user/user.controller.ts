@@ -57,6 +57,14 @@ export class UserController {
     return this.userService.findTodayBirthdays();
   }
 
+  @Put('change-password/:id')
+async changePassword(
+  @Param('id', ParseIntPipe) id: number,
+  @Body() body: { currentPassword: string; newPassword: string }
+) {
+  return this.userService.changePassword(id, body);
+}
+
   @Put('/:id')
   @UseInterceptors(
     FileInterceptor('image', {

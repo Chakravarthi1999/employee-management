@@ -51,6 +51,14 @@ export class UserRepository {
     });
   }
 
+  async updatePassword(id: number, hashedPassword: string) {
+  return this.prisma.user.update({
+    where: { id },
+    data: { password: hashedPassword },
+  });
+}
+
+
   async findUserById(id: number) {
     return this.prisma.user.findUnique({ where: { id } });
   }

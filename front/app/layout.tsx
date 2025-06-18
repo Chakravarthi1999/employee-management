@@ -28,6 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <AuthProvider>
                <div className="app-wrapper"> 
+
  <Navbar/>
          <div className="main-content"> 
 

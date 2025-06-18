@@ -13,6 +13,7 @@ const apiEndpoints = {
   visiblebanners: '/visible-banners',
     count: '/notifications/count',
   markRead: '/notifications/mark-read',
+  changePassword:'/change-password'
 
 } as const;
 

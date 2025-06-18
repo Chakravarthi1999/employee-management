@@ -1,5 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 @Injectable()
 export class MailService {
@@ -7,12 +10,12 @@ export class MailService {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
+      host: process.env.EMAIL_SERVICE_HOST,
+      port: parseInt(process.env.EMAIL_SERVICE_PORT || '587'),
       secure: false,
       auth: {
-        user: 'arigelamanikanta79@gmail.com',
-        pass: 'cugz kzua ruzo huhc',
+        user: process.env.EMAIL_SERVICE_USER,
+        pass: process.env.EMAIL_SERVICE_PASS,
       },
     });
   }
@@ -20,7 +23,7 @@ export class MailService {
   async sendWelcomeEmail(to: string, name: string) {
     try {
       await this.transporter.sendMail({
-        from: '"EMS Team" <arigelamanikanta79@gmail.com>',
+        from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_SERVICE_USER}>`,
         to,
         subject: 'Thank you for registering!',
         html: `<p>Dear ${name},</p>
@@ -29,7 +32,6 @@ export class MailService {
       });
     } catch (error) {
       console.error('Error sending email:', error);
-      throw new InternalServerErrorException('Failed to send email');
     }
   }
 }
