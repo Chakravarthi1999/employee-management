@@ -1,4 +1,10 @@
-import { Injectable, BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import * as bcrypt from 'bcrypt';
 import * as fs from 'fs';
@@ -12,8 +18,7 @@ export class UserService {
   constructor(
     private userRepository: UserRepository,
     private mailService: MailService,
-      private jwtService: JwtService,
-
+    private jwtService: JwtService,
   ) {}
 
   async verifyFirebaseToken(idToken: string) {
@@ -28,7 +33,7 @@ export class UserService {
 
   async register(data: any, image: Express.Multer.File) {
     try {
-       await admin.auth().getUserByEmail(data.email);
+      await admin.auth().getUserByEmail(data.email);
       throw new BadRequestException('Email already exists');
     } catch (error) {
       if (error.code === 'auth/user-not-found') {
@@ -51,40 +56,68 @@ export class UserService {
     return { message: 'User registered successfully' };
   }
 
-async login(data: { idToken: string }) {
-  const decodedToken = await this.verifyFirebaseToken(data.idToken);
-  
-  const user = await this.userRepository.findUserByEmail(decodedToken.email as string);
-  if (!user) {
-    throw new BadRequestException('Invalid credentials');
+  async login(data: { idToken: string }) {
+    const decodedToken = await this.verifyFirebaseToken(data.idToken);
+
+    const user = await this.userRepository.findUserByEmail(
+      decodedToken.email as string,
+    );
+    if (!user) throw new BadRequestException('Invalid credentials');
+
+    const payload = { id: user.id, email: user.email, role: user.role };
+    const token = this.jwtService.sign(payload);
+
+    return { user, token };
   }
-const payload = { id: user.id, email: user.email, role: user.role };
 
-  const token = this.jwtService.sign(payload);
+  async forgotPassword(email: string) {
+    const user = await this.userRepository.findUserByEmail(email);
+    if (!user) throw new NotFoundException('Email not registered');
 
-  return {user,token };
-}
+    const randomPassword = Math.random().toString(36).slice(-10);
 
-async changePassword(
-  id: number,
-  data: { currentPassword: string; newPassword: string }
-) {
-  const user = await this.userRepository.findUserById(id);
-  if (!user) throw new NotFoundException('User not found');
+    try {
+      const fbUser = await admin.auth().getUserByEmail(email);
+      await admin.auth().updateUser(fbUser.uid, {
+        password: randomPassword,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to update Firebase password',
+      );
+    }
 
-  const isMatch = await bcrypt.compare(data.currentPassword, user.password);
-  if (!isMatch) throw new BadRequestException('Incorrect current password');
+    const hashedPassword = await bcrypt.hash(randomPassword, 10);
+    await this.userRepository.updatePassword(user.id, hashedPassword);
+    await this.mailService.sendResetPasswordEmail(
+      email,
+      user.name,
+      randomPassword,
+    );
 
-  const fbUser = await admin.auth().getUserByEmail(user.email);
-  await admin.auth().updateUser(fbUser.uid, {
-    password: data.newPassword,
-  });
+    return { message: 'A new password has been sent to your email' };
+  }
 
-  const hashedPassword = await bcrypt.hash(data.newPassword, 10);
-  await this.userRepository.updatePassword(id, hashedPassword);
+  async changePassword(
+    id: number,
+    data: { currentPassword: string; newPassword: string },
+  ) {
+    const user = await this.userRepository.findUserById(id);
+    if (!user) throw new NotFoundException('User not found');
 
-  return { message: 'Password changed successfully' };
-}
+    const isMatch = await bcrypt.compare(data.currentPassword, user.password);
+    if (!isMatch) throw new BadRequestException('Incorrect current password');
+
+    const fbUser = await admin.auth().getUserByEmail(user.email);
+    await admin.auth().updateUser(fbUser.uid, {
+      password: data.newPassword,
+    });
+
+    const hashedPassword = await bcrypt.hash(data.newPassword, 10);
+    await this.userRepository.updatePassword(id, hashedPassword);
+
+    return { message: 'Password changed successfully' };
+  }
 
   async getAllUsers() {
     return this.userRepository.getAllUsers();
@@ -94,20 +127,29 @@ async changePassword(
     return this.userRepository.findTodayBirthdays();
   }
 
-  async updateProfile(id: number, data: any, image: Express.Multer.File) {
+  async updateProfile(
+    id: number,
+    data: any,
+    image: Express.Multer.File,
+  ) {
     const user = await this.userRepository.findUserById(id);
     if (!user) throw new NotFoundException('User not found');
 
     const fbUser = await admin.auth().getUserByEmail(user.email);
     if (user.email !== data.email) {
-      await admin.auth().updateUser(fbUser.uid, { email: data.email, password: data.password });
+      await admin.auth().updateUser(fbUser.uid, {
+        email: data.email,
+        password: data.password,
+      });
     }
 
     let imagePath = user.image;
     if (image) {
       if (user.image) {
         const oldImagePath = path.join(process.cwd(), 'uploads', user.image);
-        if (fs.existsSync(oldImagePath)) fs.unlinkSync(oldImagePath);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
       }
       imagePath = image.filename;
     }
@@ -135,7 +177,9 @@ async changePassword(
 
     if (user.image) {
       const imagePath = path.join(process.cwd(), 'uploads', user.image);
-      if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
+      }
     }
 
     await this.userRepository.deleteUser(id);

@@ -1,26 +1,23 @@
 'use client';
 
-import AuthContext from '@/context/AuthContext';
 import React, { useContext } from 'react';
+import AuthContext from '@/context/AuthContext';
 
 const Footer = () => {
-const auth = useContext(AuthContext);
+  const auth = useContext(AuthContext);
 
-if (!auth) {
-  throw new Error("AuthContext is undefined. Make sure your component is wrapped with AuthProvider.");
-}
+  if (!auth) {
+    throw new Error("AuthContext is undefined. Make sure your component is wrapped with AuthProvider.");
+  }
 
-const { user } = auth;
+  const { user } = auth;
+
   if (!user) return null;
-  return (
-   <footer style={{ 
-  textAlign: 'center', 
-  padding: '1rem', 
-  background: '#ddd', 
-}}>
-  <p>© 2025 Role-Based Dashboard. All rights reserved.</p>
-</footer>
 
+  return (
+    <footer className='footer'>
+      <p>© 2025 Role-Based Dashboard. All rights reserved.</p>
+    </footer>
   );
 };
 

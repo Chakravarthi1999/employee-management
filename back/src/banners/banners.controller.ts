@@ -5,7 +5,7 @@ import {
   Body,
   UploadedFiles,
   UseInterceptors,
-  } from '@nestjs/common';
+} from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -15,7 +15,7 @@ import { UpdateBannerDto } from './dto/update-banner.dto';
 
 @Controller()
 export class BannersController {
-  constructor(private bannersService: BannersService) {}
+  constructor(private readonly bannersService: BannersService) {}
 
   @Post('upload-multiple-banners')
   @UseInterceptors(
@@ -26,7 +26,8 @@ export class BannersController {
           destination: './uploads',
           filename: (req, file, cb) => {
             const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-            cb(null, `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`);
+            const filename = `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`;
+            cb(null, filename);
           },
         }),
       },
@@ -36,21 +37,30 @@ export class BannersController {
     @UploadedFiles() files: { files?: Express.Multer.File[] },
     @Body() body: any,
   ) {
-    const { existingIds = [], existingVisibility = [], existingOrder = [], deletedIds = [] } = body;
+    const {
+      existingIds = [],
+      existingVisibility = [],
+      existingOrder = [],
+      deletedIds = [],
+    } = body;
 
     const createDtos: CreateBannerDto[] = (files.files || []).map((file, index) => ({
-      filename: file.filename, 
+      filename: file.filename,
       visibility: body.visibility?.[index] ?? 'visible',
       orderIndex: parseInt(body.order?.[index]) || 0,
     }));
 
-    const updateDtos: UpdateBannerDto[] = (Array.isArray(existingIds) ? existingIds : [existingIds]).map((id, index) => ({
+    const updateDtos: UpdateBannerDto[] = (
+      Array.isArray(existingIds) ? existingIds : [existingIds]
+    ).map((id, index) => ({
       id: parseInt(id),
-      visibility: existingVisibility[index] ?? "visible",
+      visibility: existingVisibility[index] ?? 'visible',
       orderIndex: parseInt(existingOrder[index]) || 0,
     }));
 
-    const deleteIds = Array.isArray(deletedIds) ? deletedIds.map(Number) : [parseInt(deletedIds)];
+    const deleteIds: number[] = Array.isArray(deletedIds)
+      ? deletedIds.map(Number)
+      : [parseInt(deletedIds)];
 
     await Promise.all([
       this.bannersService.createMultiple(files.files || [], createDtos),

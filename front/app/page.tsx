@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState, useRef, useContext, useEffect } from 'react';
 import axios from 'axios';
@@ -9,48 +9,49 @@ import getApiUrl from '@/constants/endpoints';
 import { toast } from 'react-toastify';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { authentic } from '@/utils/firebase';
-type FormErrors ={
+
+type FormErrors = {
   email?: string;
   password?: string;
- 
-}
+};
+
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-const [errors, setErrors] = useState<Partial<FormErrors>>({});
+  const [errors, setErrors] = useState<Partial<FormErrors>>({});
   const [serverError, setServerError] = useState('');
-const auth = useContext(AuthContext);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotError, setForgotError] = useState('');
+  const [forgotSuccess, setForgotSuccess] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-if (!auth) {
-  throw new Error("AuthContext is undefined. Make sure your component is wrapped with AuthProvider.");
-}
+  const auth = useContext(AuthContext);
+  const router = useRouter();
 
-const { user,login,loading } = auth;  const router = useRouter();
-    const [isSubmitting, setIsSubmitting] = useState(false); 
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
 
-  const emailRef = useRef(null);
-  const passwordRef = useRef(null);
+  if (!auth) {
+    throw new Error("AuthContext is undefined. Make sure your component is wrapped with AuthProvider.");
+  }
 
+  const { user, login, loading } = auth;
 
-
-
-useEffect(() => {
-  if (!loading) {
-    if (user) {
+  useEffect(() => {
+    if (!loading && user) {
       router.push('/dashboard');
     }
-  }
-}, [user, loading]);
+  }, [user, loading]);
 
   const validate = () => {
-const newErrors: Partial<FormErrors> = {};
+    const newErrors: Partial<FormErrors> = {};
     let firstInvalid = "";
 
- const addError = (field: keyof FormErrors, message: string) => {
-  newErrors[field] = message;
-  if (!firstInvalid) firstInvalid = field;
-};
-
+    const addError = (field: keyof FormErrors, message: string) => {
+      newErrors[field] = message;
+      if (!firstInvalid) firstInvalid = field;
+    };
 
     if (!email.trim()) {
       addError('email', 'Email is required');
@@ -68,51 +69,65 @@ const newErrors: Partial<FormErrors> = {};
     return { isValid: Object.keys(newErrors).length === 0, firstInvalid };
   };
 
-  const handleSubmit = async (e:any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const { isValid, firstInvalid } = validate();
 
-  if (!isValid) {
-  const focusMap: Record<keyof FormErrors, React.RefObject<any>> = {
-    email: emailRef,
-    password: passwordRef,
-   
-  };
+    if (!isValid) {
+      const focusMap: Record<keyof FormErrors, React.RefObject<any>> = {
+        email: emailRef,
+        password: passwordRef,
+      };
 
-  focusMap[firstInvalid as keyof typeof focusMap]?.current?.focus();
-  return;
-}
+      focusMap[firstInvalid as keyof typeof focusMap]?.current?.focus();
+      return;
+    }
 
- setIsSubmitting(true); 
+    setIsSubmitting(true);
 
     try {
-        const firebaseUser =await signInWithEmailAndPassword(authentic, email, password);
-const idToken = await firebaseUser.user.getIdToken();
-    
-      const res = await axios.post(`${getApiUrl("login")}`, {idToken});
-      if (res.data.user&&res.data.token ) {
+      const firebaseUser = await signInWithEmailAndPassword(authentic, email, password);
+      const idToken = await firebaseUser.user.getIdToken();
+
+      const res = await axios.post(getApiUrl("login"), { idToken });
+
+      if (res.data.user && res.data.token) {
         login(res.data.user, res.data.token);
-        setIsSubmitting(false); 
-toast.success("Login successful!");
+        toast.success("Login successful!");
+        router.push('/dashboard');
+      }
+    } catch (error: any) {
+      console.error('Login error:', error);
+      const firebaseError = error.code?.startsWith("auth");
+      const message = firebaseError
+        ? "Invalid Firebase credentials"
+        : error.response?.data?.message || "Something went wrong. Please try again.";
+      setServerError(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-     router.push('/dashboard');
-      } 
-    }catch (error:any) {
-  setIsSubmitting(false); 
-  console.error('Login error:', error);
+  const handleForgotPassword = async () => {
+    setForgotError('');
+    setForgotSuccess('');
 
- const firebaseError = error.code?.startsWith("auth");
-  const message = firebaseError
-    ? "Invalid Firebase credentials"
-    : error.response?.data?.message || "Something went wrong. Please try again.";
-  setServerError(message);
-}
+    if (!forgotEmail.trim()) {
+      setForgotError('Email is required');
+      return;
+    }
 
-}
+    try {
+      await axios.post(getApiUrl('forgotPassword'), { email: forgotEmail });
+      setForgotSuccess('A new password has been sent to your email');
+      setForgotEmail('');
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Unable to send reset email';
+      setForgotError(message);
+    }
+  };
 
-  
-
-  const handleChange = (e:any) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setErrors((prev) => ({ ...prev, [name]: '' }));
     setServerError('');
@@ -122,46 +137,71 @@ toast.success("Login successful!");
   };
 
   return (
-  
+    <>
+      {!showForgotPassword ? (
+        <form className="login-container" onSubmit={handleSubmit}>
+          <h2>Login</h2>
 
-    <form className="login-container" onSubmit={handleSubmit}>
-      <h2>Login</h2>
+          <label>Email:</label>
+          <input
+            ref={emailRef}
+            type="email"
+            name="email"
+            value={email}
+            onChange={handleChange}
+            placeholder="Enter your email"
+          />
+          {errors.email && <span className="error">{errors.email}</span>}
 
-      <label>Email:</label>
-      <input
-        ref={emailRef}
-        type="email"
-        name="email"
-        value={email}
-        onChange={handleChange}
-        placeholder="Enter your email"
-      />
-      {errors.email && <span className="error">{errors.email}</span>}
+          <label>Password:</label>
+          <input
+            ref={passwordRef}
+            type="password"
+            name="password"
+            value={password}
+            onChange={handleChange}
+            placeholder="Enter your password"
+          />
+          {errors.password && <span className="error">{errors.password}</span>}
 
-      <label>Password:</label>
-      <input
-        ref={passwordRef}
-        type="password"
-        name="password"
-        value={password}
-        onChange={handleChange}
-        placeholder="Enter your password"
-      />
-      {errors.password && <span className="error">{errors.password}</span>}
+          {serverError && <span className="error server-error">{serverError}</span>}
 
-      {serverError && <span className="error server-error">{serverError}</span>}
+          <button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? <span className="loader"></span> : 'Login'}
+          </button>
 
-<button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? <span className="loader"></span> : 'Login'}
-      </button>
-      <p className="link-text">
-        Do not have an account? <Link href="/register">Register here</Link>
-      </p>
-    </form>
-   
+          <p className="back-link" onClick={() => setShowForgotPassword(true)}>
+            Forgot password?
+          </p>
 
- 
-  
+          <p className="link-text">
+            Don't have an account? <Link href="/register">Register here</Link>
+          </p>
+        </form>
+      ) : (
+        <div className="forgot-box">
+          <h2>Forgot Password</h2>
+          <p>Enter your email and we’ll send you a random password.</p>
+
+          <input
+            type="email"
+            placeholder="Enter your email"
+            value={forgotEmail}
+            onChange={(e) => setForgotEmail(e.target.value)}
+          />
+          {forgotError && <span className="error">{forgotError}</span>}
+          {forgotSuccess && <span className="success">{forgotSuccess}</span>}
+
+          <button type="submit" onClick={handleForgotPassword}>
+            Submit
+          </button>
+
+          <p className="back-link" onClick={() => setShowForgotPassword(false)}>
+            ← Back to Login
+          </p>
+        </div>
+      )}
+    </>
   );
 };
 

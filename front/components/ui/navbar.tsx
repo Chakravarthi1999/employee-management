@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { FiBell, FiMenu } from "react-icons/fi";
 import { usePathname, useRouter } from 'next/navigation';
@@ -17,67 +17,64 @@ const Navbar = () => {
   }
 
   const { user, logout, loading } = auth;
+
   const [showNotifications, setShowNotifications] = useState(false);
   const [userrole, setUserrole] = useState("");
   const [notificationCount, setNotificationCount] = useState(0);
   const [hasUnread, setHasUnread] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [showProfileSidebar, setShowProfileSidebar] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
-const [showProfileSidebar, setShowProfileSidebar] = useState(false);
-const pathname = usePathname();
+  const pathname = usePathname();
 
+  useEffect(() => {
+    if (!loading) {
+      if (!user) {
+        router.push("/");
+      } else {
+        setUserrole(user.role);
 
-useEffect(() => {
-  if (!loading) {
-    if (!user) {
-      router.push("/");
-    } else {
-      setUserrole(user.role);
+        const fetchCount = () => {
+          axios.get(`${getApiUrl("count")}/${user.id}`).then((res) => {
+            setNotificationCount(res.data.count);
+            setHasUnread(res.data.count > 0);
+          });
+        };
 
-      const fetchCount = () => {
-        axios.get(`${getApiUrl("count")}/${user.id}`).then((res) => {
-          setNotificationCount(res.data.count);
-          setHasUnread(res.data.count > 0);
-        });
-      };
+        fetchCount();
+        const interval = setInterval(fetchCount, 5000);
 
-      fetchCount();
-      const interval = setInterval(fetchCount, 5000);
+        const handleClickOutside = (event: MouseEvent) => {
+          if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
+            setShowSidebar(false);
+          }
+        };
 
-      const handleClickOutside = (event: MouseEvent) => {
-        if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
-          setShowSidebar(false);
+        if (showSidebar) {
+          document.addEventListener("mousedown", handleClickOutside);
         }
-      };
 
-      if (showSidebar) {
-        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+          clearInterval(interval);
+          document.removeEventListener("mousedown", handleClickOutside);
+        };
       }
- 
-      return () => {
-        clearInterval(interval);
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
     }
-  }
-}, [user, loading]);
+  }, [user, loading]);
 
-useEffect(() => {
-  const savedSidebar = localStorage.getItem("showProfileSidebar");
-  if (savedSidebar === "true") {
-    setShowProfileSidebar(true);
-  }
-}, []);
+  useEffect(() => {
+    const savedSidebar = localStorage.getItem("showProfileSidebar");
+    if (savedSidebar === "true") {
+      setShowProfileSidebar(true);
+    }
+  }, []);
 
-useEffect(() => {
-  if (pathname !== "/edit-profile" && pathname !== "/change-password") {
-    localStorage.removeItem("showProfileSidebar");
-    setShowProfileSidebar(false);
-  }
-}, [pathname]);
-
-
-
+  useEffect(() => {
+    if (pathname !== "/edit-profile" && pathname !== "/change-password") {
+      localStorage.removeItem("showProfileSidebar");
+      setShowProfileSidebar(false);
+    }
+  }, [pathname]);
 
   const handleBellClick = async () => {
     setShowNotifications(!showNotifications);
@@ -87,6 +84,7 @@ useEffect(() => {
       setHasUnread(false);
     }
   };
+
   type User = {
     id: number;
     name: string;
@@ -97,20 +95,20 @@ useEffect(() => {
     role: string;
     type?: string;
   };
-  const handleEdit = (employee: User) => {
-      setShowSidebar(false);
-              setShowProfileSidebar(true);
-    localStorage.setItem('selectedEmployee', JSON.stringify(employee));
-      localStorage.setItem("showProfileSidebar", "true"); // Add this
 
+  const handleEdit = (employee: User) => {
+    setShowSidebar(false);
+    setShowProfileSidebar(true);
+    localStorage.setItem('selectedEmployee', JSON.stringify(employee));
+    localStorage.setItem("showProfileSidebar", "true");
     router.push('/edit-profile');
   };
+
   if (!user) return null;
 
   return (
     <nav className="navbar">
       <div className="navbar-left">
-        
         {user.image && (
           <img
             src={`${getApiUrl("uploads")}/${user.image}`}
@@ -137,7 +135,6 @@ useEffect(() => {
                 <span className="notification-count-badge">{notificationCount}</span>
               )}
             </button>
-
             {showNotifications && <Notifications onClose={() => setShowNotifications(false)} />}
           </>
         )}
@@ -146,54 +143,52 @@ useEffect(() => {
         </button>
       </div>
 
+      {showSidebar && (
+        <div ref={panelRef} className="sidebar-dropdown">
+          <button onClick={() => handleEdit(user)} className="sidebar-link">Edit Profile</button>
+          <button
+            onClick={() => {
+              setShowSidebar(false);
+              setShowProfileSidebar(true);
+              localStorage.setItem("showProfileSidebar", "true");
+              router.push('/change-password');
+            }}
+            className="sidebar-link"
+          >
+            Change Password
+          </button>
+          <button
+            onClick={() => {
+              localStorage.removeItem("showProfileSidebar");
+              logout();
+            }}
+            className="sidebar-link"
+          >
+            Logout
+          </button>
+        </div>
+      )}
 
-{showSidebar && (
-  <div ref={panelRef} className="sidebar-dropdown">
-              <button onClick={() => handleEdit(user)} className='sidebar-link'>Edit profile</button>
-
-
-    <button
-      onClick={() => {
-        setShowSidebar(false);
-        setShowProfileSidebar(true);
-          localStorage.setItem("showProfileSidebar", "true");
-
-        router.push('/change-password');
-      }}
-      className="sidebar-link"
-    >
-      Change Password
-    </button>
-
-    <button onClick={() => {
-  localStorage.removeItem("showProfileSidebar");
-  logout();
-}} className="sidebar-link">Logout</button>
-
-  </div>
-)}
-
-{showProfileSidebar && (
-  <div  className="sidebar-left">
-    <h3 className="sidebar-heading">My Profile</h3>
-     <button 
-      onClick={() => handleEdit(user)} 
-      className={`sidebar-link ${pathname === "/edit-profile" ? "active-link" : ""}`}
-    >
-      Edit Profile
-    </button>
-    <button 
-      onClick={() => {
-        localStorage.setItem("showProfileSidebar", "true");
-        router.push('/change-password');
-      }} 
-      className={`sidebar-link ${pathname === "/change-password" ? "active-link" : ""}`}
-    >
-      Change Password
-    </button>
-    </div>
-)}
-
+      {showProfileSidebar && (
+        <div className="sidebar-left">
+          <h3 className="sidebar-heading">My Profile</h3>
+          <button
+            onClick={() => handleEdit(user)}
+            className={`sidebar-link ${pathname === "/edit-profile" ? "active-link" : ""}`}
+          >
+            Edit Profile
+          </button>
+          <button
+            onClick={() => {
+              localStorage.setItem("showProfileSidebar", "true");
+              router.push('/change-password');
+            }}
+            className={`sidebar-link ${pathname === "/change-password" ? "active-link" : ""}`}
+          >
+            Change Password
+          </button>
+        </div>
+      )}
     </nav>
   );
 };

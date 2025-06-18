@@ -34,7 +34,7 @@ export class NotificationsService {
   }
 
   async update(id: number, data: { title?: string; description?: string; image?: string }) {
-    return await this.repository.updateNotification(id, data);
+    return this.repository.updateNotification(id, data);
   }
 
   async remove(id: number) {
@@ -59,6 +59,7 @@ export class NotificationsService {
   async getUnreadCount(userId: number) {
     const totalCount = await this.repository.countTotalNotifications();
     const readCount = await this.repository.countReadNotifications(userId);
+
     return { count: totalCount - readCount };
   }
 

@@ -6,7 +6,9 @@ export class UserRepository {
   constructor(private prisma: PrismaService) {}
 
   async findUserByEmail(email: string) {
-    return this.prisma.user.findUnique({ where: { email } });
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
   }
 
   async createUser(data: any, hashedPassword: string, imagePath: string) {
@@ -52,15 +54,16 @@ export class UserRepository {
   }
 
   async updatePassword(id: number, hashedPassword: string) {
-  return this.prisma.user.update({
-    where: { id },
-    data: { password: hashedPassword },
-  });
-}
-
+    return this.prisma.user.update({
+      where: { id },
+      data: { password: hashedPassword },
+    });
+  }
 
   async findUserById(id: number) {
-    return this.prisma.user.findUnique({ where: { id } });
+    return this.prisma.user.findUnique({
+      where: { id },
+    });
   }
 
   async updateUser(id: number, data: any, imagePath: string) {
@@ -77,6 +80,8 @@ export class UserRepository {
   }
 
   async deleteUser(id: number) {
-    return this.prisma.user.delete({ where: { id } });
+    return this.prisma.user.delete({
+      where: { id },
+    });
   }
 }

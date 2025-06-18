@@ -24,27 +24,31 @@ export class BannersRepository {
   }
 
   async updateBanners(updates: UpdateBannerDto[]) {
-    const updatesPromises = updates.map((dto) =>
+    const updatePromises = updates.map((dto) =>
       this.prisma.banner.update({
         where: { id: dto.id },
         data: {
           visibility: dto.visibility ?? 'visible',
           order_index: dto.orderIndex ?? 0,
         },
-      }),
+      })
     );
-    return Promise.all(updatesPromises);
+    return Promise.all(updatePromises);
   }
 
   async getBannersByIds(ids: number[]) {
-    return await this.prisma.banner.findMany({
+    return this.prisma.banner.findMany({
       where: { id: { in: ids } },
     });
   }
 
   async deleteBanners(ids: number[]) {
     return Promise.all(
-      ids.map((id) => this.prisma.banner.delete({ where: { id } })),
+      ids.map((id) =>
+        this.prisma.banner.delete({
+          where: { id },
+        })
+      )
     );
   }
 
@@ -56,7 +60,9 @@ export class BannersRepository {
       } catch (err) {
         if (err.code !== 'ENOENT') throw err;
       }
-      return this.prisma.banner.delete({ where: { id: banner.id } });
+      return this.prisma.banner.delete({
+        where: { id: banner.id },
+      });
     });
     return Promise.all(deletions);
   }

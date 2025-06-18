@@ -11,9 +11,10 @@ const apiEndpoints = {
   notifications: '/notifications',
   birthdays: '/birthdays',
   visiblebanners: '/visible-banners',
-    count: '/notifications/count',
+  count: '/notifications/count',
   markRead: '/notifications/mark-read',
-  changePassword:'/change-password'
+  changePassword:'/change-password',
+  forgotPassword:'/forgot-password'
 
 } as const;
 

@@ -15,7 +15,6 @@ import { diskStorage } from 'multer';
 import { UserService } from './user.service';
 import { extname } from 'path';
 
-
 @Controller()
 export class UserController {
   constructor(private userService: UserService) {}
@@ -42,8 +41,13 @@ export class UserController {
   }
 
   @Post('login')
-  async login(@Body() body: {idToken:string }) {
+  async login(@Body() body: { idToken: string }) {
     return this.userService.login(body);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() body: { email: string }) {
+    return this.userService.forgotPassword(body.email);
   }
 
   @Get('users')
@@ -51,19 +55,18 @@ export class UserController {
     return this.userService.getAllUsers();
   }
 
-
-  @Get('/birthdays')
+  @Get('birthdays')
   async getTodayBirthdays() {
     return this.userService.findTodayBirthdays();
   }
 
   @Put('change-password/:id')
-async changePassword(
-  @Param('id', ParseIntPipe) id: number,
-  @Body() body: { currentPassword: string; newPassword: string }
-) {
-  return this.userService.changePassword(id, body);
-}
+  async changePassword(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { currentPassword: string; newPassword: string },
+  ) {
+    return this.userService.changePassword(id, body);
+  }
 
   @Put('/:id')
   @UseInterceptors(
@@ -71,14 +74,14 @@ async changePassword(
       storage: diskStorage({
         destination: './uploads',
         filename: (req, file, callback) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
           callback(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
         },
       }),
     }),
   )
-
   async updateProfile(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: any,

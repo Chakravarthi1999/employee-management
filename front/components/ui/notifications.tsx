@@ -18,9 +18,7 @@ interface Employee {
   name: string;
 }
 
-
 const formatDateTime = (createdAt: string) => {
-
   const date = new Date(createdAt.replace(" ", "T"));
   const now = new Date();
 
@@ -70,13 +68,13 @@ const Notifications = ({ onClose }: { onClose: () => void }) => {
   }
 
   const { user } = authContext;
-
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-   fetchBirthdays();
-     fetchNotifications();
-     listenRealtimeNotifications();
+    fetchBirthdays();
+    fetchNotifications();
+    listenRealtimeNotifications();
+
     const handleClickOutside = (event: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
         onClose();
@@ -89,7 +87,7 @@ const Notifications = ({ onClose }: { onClose: () => void }) => {
     };
   }, []);
 
-   const fetchBirthdays = async () => {
+  const fetchBirthdays = async () => {
     try {
       const birthdayRes = await axios.get<Employee[]>(getApiUrl("birthdays"));
       const birthdayNotifs = birthdayRes.data.map((emp: Employee) => ({
@@ -102,70 +100,66 @@ const Notifications = ({ onClose }: { onClose: () => void }) => {
             : `🎉 Today is ${emp.name}'s birthday.`,
       }));
 
- setNotifications((prev) => {
-      const existingIds = new Set(prev.map(n => n.id));
-      const newBirthdays = birthdayNotifs.filter(n => !existingIds.has(n.id));
-      return [...prev, ...newBirthdays];
-    });    } catch (error) {
+      setNotifications((prev) => {
+        const existingIds = new Set(prev.map(n => n.id));
+        const newBirthdays = birthdayNotifs.filter(n => !existingIds.has(n.id));
+        return [...prev, ...newBirthdays];
+      });
+    } catch (error) {
       console.error("Failed to fetch birthdays:", error);
     }
   };
 
- 
-const listenRealtimeNotifications = () => {
-  if (!user) return;
-
-  const notificationsRef = ref(database, 'notifications');
-
-  onChildAdded(notificationsRef, async (snapshot) => {
-    const data = snapshot.val();
-
-    if (data.receiverIds && data.receiverIds.includes(user.id)) {
-
-      const newNotif: Notification = {
-        id: snapshot.key!,
-        createdAt: data.createdAt,
-        title: data.title,
-        description: data.description,
-      };
-
-      setNotifications((prev) => {
-        if (prev.some(notif => notif.id === newNotif.id)) {
-          return prev;
-        }
-        return [newNotif, ...prev];
-      });
-const notifRef = ref(database, `notifications/${snapshot.key}`);
-await remove(notifRef);
-
-    }
-  });
-};
-
-
-const fetchNotifications = async () => {
-  try {
+  const listenRealtimeNotifications = () => {
     if (!user) return;
 
-    const res = await axios.get(`${getApiUrl("notifications")}/${user.id}`);
-    const data: Notification[] = res.data.map((notif: any) => ({
-      id: notif.id.toString(),
-      createdAt: notif.createdAt,
-      title: notif.title,
-      description: notif.description
-    }));
+    const notificationsRef = ref(database, 'notifications');
 
-    setNotifications((prev) => {
-      const existingIds = new Set(prev.map(n => n.id));
-      const newNotifications = data.filter(n => !existingIds.has(n.id));
-      return [...prev, ...newNotifications];
+    onChildAdded(notificationsRef, async (snapshot) => {
+      const data = snapshot.val();
+
+      if (data.receiverIds && data.receiverIds.includes(user.id)) {
+        const newNotif: Notification = {
+          id: snapshot.key!,
+          createdAt: data.createdAt,
+          title: data.title,
+          description: data.description,
+        };
+
+        setNotifications((prev) => {
+          if (prev.some(notif => notif.id === newNotif.id)) {
+            return prev;
+          }
+          return [newNotif, ...prev];
+        });
+
+        const notifRef = ref(database, `notifications/${snapshot.key}`);
+        await remove(notifRef);
+      }
     });
+  };
 
-  } catch (err) {
-    console.error("Failed to fetch backend notifications", err);
-  }
-};
+  const fetchNotifications = async () => {
+    try {
+      if (!user) return;
 
+      const res = await axios.get(`${getApiUrl("notifications")}/${user.id}`);
+      const data: Notification[] = res.data.map((notif: any) => ({
+        id: notif.id.toString(),
+        createdAt: notif.createdAt,
+        title: notif.title,
+        description: notif.description,
+      }));
+
+      setNotifications((prev) => {
+        const existingIds = new Set(prev.map(n => n.id));
+        const newNotifications = data.filter(n => !existingIds.has(n.id));
+        return [...prev, ...newNotifications];
+      });
+    } catch (err) {
+      console.error("Failed to fetch backend notifications", err);
+    }
+  };
 
   return (
     <div ref={panelRef} className="notification-panel">
@@ -176,11 +170,14 @@ const fetchNotifications = async () => {
       <div className="notification-content">
         {notifications.map((item) => (
           <div key={item.id} className="notification-item">
- <p className="notification-time">
-              {item.id.startsWith('bday-') 
-                ? "Today 12:00 AM" 
+            <p className="notification-time">
+              {item.id.startsWith('bday-')
+                ? "Today 12:00 AM"
                 : formatDateTime(item.createdAt)}
-            </p>            <p className="notification-title"><strong>{item.title}</strong></p>
+            </p>
+            <p className="notification-title">
+              <strong>{item.title}</strong>
+            </p>
             <p className="notification-desc">{item.description}</p>
           </div>
         ))}

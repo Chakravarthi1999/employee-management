@@ -27,26 +27,23 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <AuthProvider>
-               <div className="app-wrapper"> 
-
- <Navbar/>
-         <div className="main-content"> 
-
-        {children}
-         <ToastContainer 
-        position="bottom-right" 
-        autoClose={1000} 
-        hideProgressBar 
-        closeOnClick 
-        pauseOnHover={false} 
-        draggable={false} 
-        theme="colored"
-      />
-        </div>
-        <Footer/>
-        </div>
+          <div className="app-wrapper">
+            <Navbar />
+            <div className="main-content">
+              {children}
+              <ToastContainer
+                position="bottom-right"
+                autoClose={1000}
+                hideProgressBar
+                closeOnClick
+                pauseOnHover={false}
+                draggable={false}
+                theme="colored"
+              />
+            </div>
+            <Footer />
+          </div>
         </AuthProvider>
-
       </body>
     </html>
   );

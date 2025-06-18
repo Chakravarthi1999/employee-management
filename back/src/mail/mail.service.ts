@@ -34,4 +34,24 @@ export class MailService {
       console.error('Error sending email:', error);
     }
   }
+
+async sendResetPasswordEmail(to: string, name: string, newPassword: string) {
+  try {
+    await this.transporter.sendMail({
+      from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_SERVICE_USER}>`,
+      to,
+      subject: 'Password Reset',
+      html: `<p>Hi ${name},</p>
+             <p>Your password has been reset. Here is your new password:</p>
+             <p><strong>${newPassword}</strong></p>
+             <p>Please login and change your password immediately.</p>
+             <p>Best regards,<br/>EMS Team</p>`,
+    });
+  } catch (error) {
+    console.error('Error sending reset email:', error);
+    throw new InternalServerErrorException('Failed to send reset email');
+  }
+}
+
+
 }

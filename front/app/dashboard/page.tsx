@@ -31,9 +31,7 @@ function Dashboard() {
   const auth = useContext(AuthContext);
 
   if (!auth) {
-    throw new Error(
-      "AuthContext is undefined. Make sure your component is wrapped with AuthProvider."
-    );
+    throw new Error("AuthContext is undefined. Make sure your component is wrapped with AuthProvider.");
   }
 
   const { user, logout, token, loading } = auth;
@@ -48,31 +46,31 @@ function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    // if (!loading) {
-      if (!user) {
-        router.push("/");
-      } else {
-        setUserrole(user.role ?? "");
-        const loadUsers = async () => {
-          if (!token) {
-            logout();
-            return;
-          }
-          await fetchUsers(token, logout, setEmployees);
-          setLoader(false);
-        };
-        const fetchBanners = async () => {
-          try {
-            const res = await axios.get(`${getApiUrl("visiblebanners")}`);
-            setBanners(res.data);
-          } catch (err) {
-            console.error("Failed to load banners", err);
-          }
-        };
+    if (!user) {
+      router.push("/");
+    } else {
+      setUserrole(user.role ?? "");
 
-        fetchBanners();
-        loadUsers();
-      
+      const loadUsers = async () => {
+        if (!token) {
+          logout();
+          return;
+        }
+        await fetchUsers(token, logout, setEmployees);
+        setLoader(false);
+      };
+
+      const fetchBanners = async () => {
+        try {
+          const res = await axios.get(`${getApiUrl("visiblebanners")}`);
+          setBanners(res.data);
+        } catch (err) {
+          console.error("Failed to load banners", err);
+        }
+      };
+
+      fetchBanners();
+      loadUsers();
     }
   }, [user, token, loading, logout, router]);
 
@@ -91,17 +89,15 @@ function Dashboard() {
     }
 
     try {
+      await axios.delete(`${API_BASE_URL}/${deleteTarget}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       if (user && deleteTarget === user.id) {
-        await axios.delete(`${API_BASE_URL}/${deleteTarget}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
         logout();
         toast.success("Deleted successfully!");
         router.push("/");
       } else {
-        await axios.delete(`${API_BASE_URL}/${deleteTarget}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
         toast.success("Deleted successfully!");
         fetchUsers(token, logout, setEmployees);
       }
@@ -127,9 +123,7 @@ function Dashboard() {
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   return (
     <>
