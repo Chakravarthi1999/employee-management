@@ -101,7 +101,7 @@ const LoginForm = () => {
       const firebaseError = error.code?.startsWith("auth");
       const message = firebaseError
         ? "Invalid Firebase credentials"
-        : error.response?.data?.message || "Something went wrong. Please try again.";
+        : error.response?.data?.message || "Something went wrong.Please try again.";
       setServerError(message);
     } finally {
       setIsSubmitting(false);
@@ -183,6 +183,7 @@ const LoginForm = () => {
           <h2>Forgot Password</h2>
           <p>Enter your email and we’ll send you a random password.</p>
 
+  <div className="input-group">
           <input
             type="email"
             placeholder="Enter your email"
@@ -191,7 +192,7 @@ const LoginForm = () => {
           />
           {forgotError && <span className="error">{forgotError}</span>}
           {forgotSuccess && <span className="success">{forgotSuccess}</span>}
-
+</div>
           <button type="submit" onClick={handleForgotPassword}>
             Submit
           </button>

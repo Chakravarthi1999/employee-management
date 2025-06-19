@@ -42,7 +42,11 @@ function Dashboard() {
   const [userrole, setUserrole] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
-
+  const [counts, setCounts] = useState({
+    total: 0,
+    adminCreated: 0,
+    selfRegistered: 0,
+  });
   const router = useRouter();
 
   useEffect(() => {
@@ -69,10 +73,29 @@ function Dashboard() {
         }
       };
 
+      fetchData();
       fetchBanners();
       loadUsers();
     }
   }, [user, token, loading, logout, router]);
+  const fetchData = async () => {
+    try {
+      const res = await axios.get(getApiUrl("users"));
+      const allUsers = res.data;
+
+      const total = allUsers.filter((u: any) => u.role === "employee").length;
+      const adminCreated = allUsers.filter(
+        (u: any) => u.role === "employee" && u.createdby === "admin"
+      ).length;
+      const selfRegistered = allUsers.filter(
+        (u: any) => u.role === "employee" && u.createdby === "self"
+      ).length;
+
+      setCounts({ total, adminCreated, selfRegistered });
+    } catch (err) {
+      console.error("Failed to load users", err);
+    }
+  };
 
   const confirmDelete = (id: number) => {
     setDeleteTarget(id);
@@ -100,6 +123,7 @@ function Dashboard() {
       } else {
         toast.success("Deleted successfully!");
         fetchUsers(token, logout, setEmployees);
+        fetchData();
       }
     } catch (err) {
       console.error("Delete error:", err);
@@ -127,6 +151,24 @@ function Dashboard() {
 
   return (
     <>
+      <div className="reports-dashboard">
+        <h2>Reports - Dashboard</h2>
+
+        <div className="card-container">
+          <div className="card green">
+            <h3>Total Employees</h3>
+            <p>{counts.total}</p>
+          </div>
+          <div className="card blue">
+            <h3>Admin Created Employees</h3>
+            <p>{counts.adminCreated}</p>
+          </div>
+          <div className="card purple">
+            <h3>Employees from Registration</h3>
+            <p>{counts.selfRegistered}</p>
+          </div>
+        </div>
+      </div>
       {userrole !== "admin" && banners.length > 0 && (
         <div className="carousel-wrapper">
           <Carousel

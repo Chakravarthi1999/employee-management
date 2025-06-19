@@ -10,29 +10,16 @@ import {
   ParseIntPipe,
   Put,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
 import { UserService } from './user.service';
-import { extname } from 'path';
+import { imageUploadInterceptor } from '../upload.config';
 
 @Controller()
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(private userService: UserService) { }
 
   @Post('register')
-  @UseInterceptors(
-    FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, callback) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          callback(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
-        },
-      }),
-    }),
-  )
+  @UseInterceptors(imageUploadInterceptor)
+
   async register(
     @UploadedFile() image: Express.Multer.File,
     @Body() body: any,
@@ -50,6 +37,19 @@ export class UserController {
     return this.userService.forgotPassword(body.email);
   }
 
+//   @Post('addUser')
+//   @UseInterceptors(imageUploadInterceptor)
+//  async addUser(@UploadedFile() image: Express.Multer.File, @Body() body: any) {
+//     return this.userService.addUser(body, image?.filename);
+//   }
+  @Put('change-password/:id')
+  async changePassword(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { currentPassword: string; newPassword: string },
+  ) {
+    return this.userService.changePassword(id, body);
+  }
+
   @Get('users')
   async findAll() {
     return this.userService.getAllUsers();
@@ -60,28 +60,9 @@ export class UserController {
     return this.userService.findTodayBirthdays();
   }
 
-  @Put('change-password/:id')
-  async changePassword(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: { currentPassword: string; newPassword: string },
-  ) {
-    return this.userService.changePassword(id, body);
-  }
-
   @Put('/:id')
-  @UseInterceptors(
-    FileInterceptor('image', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, callback) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          callback(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
-        },
-      }),
-    }),
-  )
+  @UseInterceptors(imageUploadInterceptor)
+
   async updateProfile(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: any,

@@ -17,6 +17,7 @@ model User {
   type              String?
   dob               DateTime
   image             String
+  createdby         String              @default("self")
   createdAt         DateTime           @default(now())
   notificationReads NotificationRead[]
 }

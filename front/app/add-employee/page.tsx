@@ -24,6 +24,7 @@ const AddEmployee = () => {
     type: '',
     dob: '',
     image: '',
+    createdby: 'admin'
   });
 
   type FormFields = {
@@ -125,7 +126,7 @@ const AddEmployee = () => {
     const { isValid, firstInvalid } = validate();
 
     if (!isValid) {
-      type FieldKey = Exclude<keyof typeof formData, 'role'>;
+      type FieldKey = Exclude<keyof typeof formData, 'role' | 'createdby'>;
 
       const focusMap: Record<FieldKey, React.RefObject<any>> = {
         name: nameRef,

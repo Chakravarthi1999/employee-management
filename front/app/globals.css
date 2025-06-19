@@ -160,12 +160,17 @@ select:focus {
   width: 80px;
 }
 
+.input-group {
+  margin-bottom: 4px;
+}
+
 .error {
   display: block;
-  float: left;
   color: red;
   font-size: 14px;
+  margin-top: 0;
 }
+
 
 button[type="submit"] {
   width: 100%;
@@ -360,6 +365,36 @@ button[type="submit"]:hover {
 .dashboard-header {
   margin-bottom: 30px;
 
+}
+
+.reports-dashboard {
+  padding: 1rem;
+}
+
+.card-container {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.card {
+  flex: 1;
+  min-width: 200px;
+  padding: 1rem;
+  border-radius: 10px;
+  color: white;
+}
+
+.green {
+  background: #28a745;
+}
+
+.blue {
+  background: #007bff;
+}
+
+.purple {
+  background: #6f42c1;
 }
 
 .loading-wrapper {

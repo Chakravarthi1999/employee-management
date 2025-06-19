@@ -72,7 +72,7 @@ export class UserService {
 
   async forgotPassword(email: string) {
     const user = await this.userRepository.findUserByEmail(email);
-    if (!user) throw new NotFoundException('Email not registered');
+    if (!user) throw new NotFoundException('Email not registered in our records');
 
     const randomPassword = Math.random().toString(36).slice(-10);
 
@@ -82,9 +82,7 @@ export class UserService {
         password: randomPassword,
       });
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to update Firebase password',
-      );
+      throw new InternalServerErrorException('Failed to update Firebase password');
     }
 
     const hashedPassword = await bcrypt.hash(randomPassword, 10);

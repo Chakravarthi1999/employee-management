@@ -18,6 +18,7 @@ export class UserRepository {
         password: hashedPassword,
         dob: new Date(data.dob),
         image: imagePath,
+        
       },
     });
   }
@@ -33,6 +34,7 @@ export class UserRepository {
         type: true,
         dob: true,
         image: true,
+        createdby:true,
       },
     });
   }

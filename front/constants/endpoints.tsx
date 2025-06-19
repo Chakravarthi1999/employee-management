@@ -14,7 +14,8 @@ const apiEndpoints = {
   count: '/notifications/count',
   markRead: '/notifications/mark-read',
   changePassword:'/change-password',
-  forgotPassword:'/forgot-password'
+  forgotPassword:'/forgot-password',
+  // addUser:'/add-user',
 
 } as const;
 

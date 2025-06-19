@@ -25,12 +25,12 @@ export class NotificationsService {
     return notification;
   }
 
-  async getUserNotifications(userId: number) {
-    return this.repository.getUserNotifications(userId);
+    async findAll() {
+    return this.repository.getAllNotifications();
   }
 
-  async findAll() {
-    return this.repository.getAllNotifications();
+    async getUserNotifications(userId: number) {
+    return this.repository.getUserNotifications(userId);
   }
 
   async update(id: number, data: { title?: string; description?: string; image?: string }) {

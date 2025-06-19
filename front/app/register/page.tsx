@@ -16,6 +16,7 @@ const RegisterForm = () => {
     type: string;
     dob: string;
     image: any;
+    createdby: string;
   };
 
   type FormErrors = {
@@ -37,7 +38,8 @@ const RegisterForm = () => {
     role: '',
     type: '',
     dob: '',
-    image: ''
+    image: '',
+    createdby: 'self'
   });
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -81,7 +83,9 @@ const RegisterForm = () => {
         else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) errorMsg = 'Valid email is required';
       }
 
-      setErrors((prev) => ({ ...prev, [name]: errorMsg }));
+      if (name in errors) {
+        setErrors((prev) => ({ ...prev, [name]: errorMsg }));
+      }
     }
   };
 
@@ -89,7 +93,7 @@ const RegisterForm = () => {
     const newErrors: Partial<FormErrors> = {};
     let firstInvalid = "";
 
-    const addError = (field: keyof FormData, message: string) => {
+    const addError = (field: Exclude<keyof typeof formData, 'createdby'>, message: string) => {
       newErrors[field] = message;
       if (!firstInvalid) firstInvalid = field;
     };
@@ -119,7 +123,7 @@ const RegisterForm = () => {
     const { isValid, firstInvalid } = validate();
 
     if (!isValid) {
-      type FieldKey = keyof typeof formData;
+      type FieldKey = Exclude<keyof typeof formData, 'createdby'>;
       const focusMap: Record<FieldKey, React.RefObject<any>> = {
         name: nameRef,
         email: emailRef,
@@ -165,55 +169,70 @@ const RegisterForm = () => {
     <form className="register-container" onSubmit={handleSubmit}>
       <h2>Register</h2>
 
-      <label>Name:</label>
-      <input ref={nameRef} name="name" type="text" value={formData.name} onChange={handleChange} placeholder="Enter Name" />
-      {errors.name && <span className="error">{errors.name}</span>}
-
-      <label>Email:</label>
-      <input ref={emailRef} name="email" type="email" value={formData.email} onChange={handleChange} placeholder="Enter Email" />
-      {errors.email && <span className="error">{errors.email}</span>}
-
-      <label>Phone Number:</label>
-      <input ref={phoneRef} name="phone" type="number" value={formData.phone} onChange={handleChange} placeholder="Enter Phone Number" />
-      {errors.phone && <span className="error">{errors.phone}</span>}
-
-      <label>Password:</label>
-      <input ref={passwordRef} name="password" type="password" value={formData.password} onChange={handleChange} placeholder="Enter Password" />
-      {errors.password && <span className="error">{errors.password}</span>}
-
-      <label>Role:</label>
-      <div className="radio-group" ref={roleRef}>
-        <label className="radio-option">
-          <input type="radio" name="role" value="admin" checked={formData.role === 'admin'} onChange={handleChange} /> Admin
-        </label>
-        <label className="radio-option">
-          <input type="radio" name="role" value="employee" checked={formData.role === 'employee'} onChange={handleChange} /> Employee
-        </label>
+      <div className="input-group">
+        <label>Name:</label>
+        <input ref={nameRef} name="name" type="text" value={formData.name} onChange={handleChange} placeholder="Enter Name" />
+        {errors.name && <span className="error">{errors.name}</span>}
       </div>
-      {errors.role && <span className="error">{errors.role}</span>}
 
-      <label>Type:</label>
-      <select name="type" ref={typeRef} value={formData.type} onChange={handleChange} disabled={formData.role === 'admin'}>
-        <option value="">Select role type</option>
-        <option value="Developer">Developer</option>
-        <option value="Tester">Tester</option>
-      </select>
-      {errors.type && <span className="error">{errors.type}</span>}
+      <div className="input-group">
+        <label>Email:</label>
+        <input ref={emailRef} name="email" type="email" value={formData.email} onChange={handleChange} placeholder="Enter Email" />
+        {errors.email && <span className="error">{errors.email}</span>}
+      </div>
 
-      <label>Date of Birth:</label>
-      <input ref={dobRef} type="date" name="dob" value={formData.dob} onChange={handleChange} max={today} />
-      {errors.dob && <span className="error">{errors.dob}</span>}
+      <div className="input-group">
+        <label>Phone Number:</label>
+        <input ref={phoneRef} name="phone" type="number" value={formData.phone} onChange={handleChange} placeholder="Enter Phone Number" />
+        {errors.phone && <span className="error">{errors.phone}</span>}
+      </div>
+      
+      <div className="input-group">
+        <label>Password:</label>
+        <input ref={passwordRef} name="password" type="password" value={formData.password} onChange={handleChange} placeholder="Enter Password" />
+        {errors.password && <span className="error">{errors.password}</span>}
+      </div>
 
-      <label>Select Image:</label>
-      <input ref={imageRef} type="file" name="image" accept="image/*" onChange={handleChange} />
-      {errors.image && <span className="error">{errors.image}</span>}
-
-      {imagePreview && (
-        <div className="image-preview">
-          <img src={imagePreview} alt="Preview" />
+      <div className="input-group">
+        <label>Role:</label>
+        <div className="radio-group" ref={roleRef}>
+          <label className="radio-option">
+            <input type="radio" name="role" value="admin" checked={formData.role === 'admin'} onChange={handleChange} /> Admin
+          </label>
+          <label className="radio-option">
+            <input type="radio" name="role" value="employee" checked={formData.role === 'employee'} onChange={handleChange} /> Employee
+          </label>
         </div>
-      )}
+        {errors.role && <span className="error">{errors.role}</span>}
+      </div>
 
+      <div className="input-group">
+        <label>Type:</label>
+        <select name="type" ref={typeRef} value={formData.type} onChange={handleChange} disabled={formData.role === 'admin'}>
+          <option value="">Select role type</option>
+          <option value="Developer">Developer</option>
+          <option value="Tester">Tester</option>
+        </select>
+        {errors.type && <span className="error">{errors.type}</span>}
+      </div>
+
+      <div className="input-group">
+        <label>Date of Birth:</label>
+        <input ref={dobRef} type="date" name="dob" value={formData.dob} onChange={handleChange} max={today} />
+        {errors.dob && <span className="error">{errors.dob}</span>}
+      </div>
+
+      <div className="input-group">
+        <label>Select Image:</label>
+        <input ref={imageRef} type="file" name="image" accept="image/*" onChange={handleChange} />
+        {errors.image && <span className="error">{errors.image}</span>}
+
+        {imagePreview && (
+          <div className="image-preview">
+            <img src={imagePreview} alt="Preview" />
+          </div>
+        )}
+      </div>
       <button type="submit" disabled={isSubmitting}>
         {isSubmitting ? <span className="loader"></span> : 'Register'}
       </button>
