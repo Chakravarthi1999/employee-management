@@ -71,30 +71,47 @@ export class UserService {
   }
 
   async forgotPassword(email: string) {
-    const user = await this.userRepository.findUserByEmail(email);
-    if (!user) throw new NotFoundException('Email not registered in our records');
+  const user = await this.userRepository.findUserByEmail(email);
+  if (!user) throw new NotFoundException('Email not registered in our records');
 
-    const randomPassword = Math.random().toString(36).slice(-10);
+  const randomPassword = Math.random().toString(36).slice(-10);
+
+  try {
+    let fbUser;
 
     try {
-      const fbUser = await admin.auth().getUserByEmail(email);
-      await admin.auth().updateUser(fbUser.uid, {
-        password: randomPassword,
-      });
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to update Firebase password');
+      fbUser = await admin.auth().getUserByEmail(email);
+    } catch (err) {
+      if (err.code === 'auth/user-not-found') {
+        fbUser = await admin.auth().createUser({
+          email,
+          password: randomPassword,
+        });
+      } else {
+        throw err; 
+      }
     }
 
-    const hashedPassword = await bcrypt.hash(randomPassword, 10);
-    await this.userRepository.updatePassword(user.id, hashedPassword);
-    await this.mailService.sendResetPasswordEmail(
-      email,
-      user.name,
-      randomPassword,
-    );
-
-    return { message: 'A new password has been sent to your email' };
+    await admin.auth().updateUser(fbUser.uid, {
+      password: randomPassword,
+    });
+  } catch (error) {
+    console.error('Firebase error:', error);
+    throw new InternalServerErrorException('Failed to update Firebase password');
   }
+
+  const hashedPassword = await bcrypt.hash(randomPassword, 10);
+  await this.userRepository.updatePassword(user.id, hashedPassword);
+
+  await this.mailService.sendResetPasswordEmail(
+    email,
+    user.name,
+    randomPassword,
+  );
+
+  return { message: 'A new password has been sent to your email' };
+}
+
 
   async changePassword(
     id: number,
